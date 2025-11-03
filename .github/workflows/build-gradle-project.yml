@@ -1,12 +1,10 @@
-name: Java CI with Gradle
+name: Build Gradle project
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-name: Build Gradle project
 
 jobs:
   build-gradle-project:
