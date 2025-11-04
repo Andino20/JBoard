@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = 'JBoard'
-include('jboard', 'demos:maedn')
+include('jboard', 'examples:maedn')
