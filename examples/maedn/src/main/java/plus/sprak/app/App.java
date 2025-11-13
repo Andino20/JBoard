@@ -1,5 +1,8 @@
 package plus.sprak.app;
 
+import plus.jboard.core.GameApplication;
+import plus.jboard.render.Drawable;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -14,11 +17,16 @@ import java.util.stream.IntStream;
 
 public class App {
 
-    public record GameObject(BufferedImage image, int x, int y) {
+    public record GameObject(BufferedImage image, int x, int y) implements Drawable {
         public GameObject(BufferedImage image, int x, int y) {
             this.image = image;
             this.x = x;
             this.y = y;
+        }
+
+        @Override
+        public void draw(Graphics2D g2d) {
+            g2d.drawImage(image, x, y, null);
         }
     }
 
@@ -45,36 +53,11 @@ public class App {
     }
 
     public static void main(String[] args) throws IOException {
-        JFrame frame = new JFrame("Mensch-ärgere-dich-nicht!");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(720, 480);
-        frame.setLocationRelativeTo(null);
-
-        RenderContext renderContext = new RenderContext();
-        frame.add(renderContext);
-
-        frame.setVisible(true);
 
         BufferedImage piece = ImageIO.read(new File(Path.of("src", "main", "resources", "piece.png").toUri()));
-        List<GameObject> pieces1 = IntStream.range(0, 10)
+        List<GameObject> pieces = IntStream.range(0, 10)
                 .mapToObj(p -> new GameObject(piece, p * 64, p * 64))
                 .toList();
-        List<GameObject> pieces2 = IntStream.range(0, 10)
-                .mapToObj(p -> new GameObject(piece, p * 64, 10*64 - p * 64))
-                .toList();
-        renderContext.setGameObjects(pieces1);
-
-        java.util.Timer t = new java.util.Timer();
-        t.scheduleAtFixedRate(new TimerTask() {
-            List<GameObject> next = pieces2;
-
-            @Override
-            public void run() {
-                renderContext.setGameObjects(next);
-                next = (next == pieces1) ? pieces2 : pieces1;
-                renderContext.repaint();
-            }
-        }, 0, 1500);
-
+        GameApplication app = new GameApplication("Mensch-ärgere-dich-nicht!", 720, 480, pieces);
     }
 }

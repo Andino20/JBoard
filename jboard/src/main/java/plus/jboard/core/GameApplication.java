@@ -1,20 +1,18 @@
 package plus.jboard.core;
 
+import plus.jboard.render.Drawable;
+
+import javax.swing.*;
+import java.util.List;
+
 public class GameApplication {
 
-    private String title;
-    private GameWindow window;
-
-    public GameApplication(String title) {
-        this.title = title;
-        window = new GameWindow(title);
-    }
-
-    public void run() {
-    }
-
-    public void addPiece(Piece p) {
-        window.renderContext.addPiece(p);
+    public GameApplication(String title, int width, int height, List<? extends Drawable> gameObjects) {
+        JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
 }
