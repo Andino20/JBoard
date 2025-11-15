@@ -10,15 +10,19 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.IntStream;
 
 
 public class App {
 
-    public record GameObject(BufferedImage image, int x, int y) implements Drawable {
-        public GameObject(BufferedImage image, int x, int y) {
+    public static class GameObject implements Drawable {
+        private Image image;
+        private int x;
+        private int y;
+
+        public GameObject(Image image, int x, int y) {
             this.image = image;
             this.x = x;
             this.y = y;
@@ -30,34 +34,28 @@ public class App {
         }
     }
 
-    public static class RenderContext extends JPanel {
-
-        private List<GameObject> objects;
-
-        public RenderContext() {
-            this.setBackground(Color.WHITE);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g;
-            for (GameObject object : objects) {
-                g2d.drawImage(object.image, object.x, object.y, null);
-            }
-        }
-
-        public void setGameObjects(List<GameObject> objects) {
-            this.objects = objects;
-        }
-    }
-
     public static void main(String[] args) throws IOException {
 
         BufferedImage piece = ImageIO.read(new File(Path.of("src", "main", "resources", "piece.png").toUri()));
-        List<GameObject> pieces = IntStream.range(0, 10)
-                .mapToObj(p -> new GameObject(piece, p * 64, p * 64))
-                .toList();
+        Image background = ImageIO.read(new File(Path.of("src", "main", "resources", "board.jpg").toUri()));
+
+        background = background.getScaledInstance(720, 480, Image.SCALE_SMOOTH);
+        ArrayList<GameObject> pieces = new ArrayList<>();
+        pieces.add(new GameObject(background, 0, 0));
+        for (int i = 0; i < 10; i++) {
+            pieces.add(new GameObject(piece, i * 64, i * 64));
+        }
+
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                pieces.get(1).x += 64;
+                pieces.get(1).x %= 64 * 10;
+            }
+        }, 0, 2000);
+
         GameApplication app = new GameApplication("Mensch-ärgere-dich-nicht!", 720, 480, pieces);
+        app.run();
     }
 }
