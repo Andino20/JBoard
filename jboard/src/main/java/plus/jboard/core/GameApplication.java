@@ -14,7 +14,7 @@ public class GameApplication {
 
     public GameApplication(String title, int width, int height, List<? extends Drawable> gameObjects) {
         JFrame frame = new JFrame(title);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -24,7 +24,6 @@ public class GameApplication {
     }
 
     public void run() {
-
         long lastTime = System.nanoTime();
         double delta = 0;
 
