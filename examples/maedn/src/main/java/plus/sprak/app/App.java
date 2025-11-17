@@ -4,7 +4,6 @@ import plus.jboard.core.GameApplication;
 import plus.jboard.render.Drawable;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -35,7 +34,6 @@ public class App {
     }
 
     public static void main(String[] args) throws IOException {
-
         BufferedImage piece = ImageIO.read(new File(Path.of("src", "main", "resources", "piece.png").toUri()));
         Image background = ImageIO.read(new File(Path.of("src", "main", "resources", "board.jpg").toUri()));
 
