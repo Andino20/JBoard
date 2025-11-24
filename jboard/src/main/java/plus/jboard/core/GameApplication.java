@@ -5,14 +5,15 @@ import plus.jboard.render.RenderContext;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.TreeMap;
 
 public class GameApplication {
     private final RenderContext renderer;
-    private final List<? extends Drawable> objects;
+    private final Scene currentScene;
     private static final double FPS = 60.0;
     private static final double FRAME_TIME = 1_000_000_000 / FPS;
 
-    public GameApplication(String title, int width, int height, List<? extends Drawable> gameObjects) {
+    public GameApplication(String title, int width, int height, Scene startingScene) {
         JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(width, height);
@@ -20,7 +21,7 @@ public class GameApplication {
         frame.setVisible(true);
         renderer = new RenderContext();
         frame.add(renderer);
-        objects = gameObjects;
+        this.currentScene = startingScene;
     }
 
     public void run() {
@@ -33,7 +34,7 @@ public class GameApplication {
             lastTime = now;
 
             while (delta >= 1) {
-                renderer.render(objects);
+                renderer.render(currentScene.getRenderObjects());
                 delta--;
             }
         }
