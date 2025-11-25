@@ -1,17 +1,16 @@
 package plus.jboard.core;
 
-import plus.jboard.render.Drawable;
 import plus.jboard.render.RenderContext;
 
 import javax.swing.*;
-import java.util.List;
-import java.util.TreeMap;
 
 public class GameApplication {
-    private final RenderContext renderer;
-    private final Scene currentScene;
+
     private static final double FPS = 60.0;
     private static final double FRAME_TIME = 1_000_000_000 / FPS;
+
+    private final RenderContext renderer;
+    private final Scene currentScene;
 
     public GameApplication(String title, int width, int height, Scene startingScene) {
         JFrame frame = new JFrame(title);
