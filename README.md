@@ -22,7 +22,7 @@ This project is a **Java-based framework for creating 2D board games**.
 ## Milestones
 
 1. **Milestone 1 (Week of Nov. 17):** Core framework architecture components defined (rendering, resource handling, basic events)
-2. **Milestone 2 (Week of Dec. 08):** Minimum viable game demo possible (board, pieces, I/O, logic)
+2. **Milestone 2 (Week of Dec. 15):** Minimum viable game demo possible (board, pieces, I/O, logic)
 3. **Milestone 3 (Week of Jan. 12):** Networking
 4. **Milestone 4 (Week of Jan. 26):** Project presentation
 5. **Milestone 5 (Jan. 31):** Hand-in
