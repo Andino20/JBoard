@@ -7,7 +7,7 @@ import plus.jboard.render.Sprite;
 
 import java.awt.Graphics2D;
 
-public abstract class GameObject implements Drawable {
+public class GameObject implements Drawable {
     private Vector2D position;
     protected Sprite sprite;
 

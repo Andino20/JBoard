@@ -14,7 +14,7 @@ public class Piece extends GameObject {
     public Piece(int id) throws MaednException {
         this.id = id;
         try {
-            this.sprite = new Sprite(Path.of("src", "main", "resources", "piece.png").toUri());
+            this.sprite = new Sprite(Path.of("src", "main", "resources", "piece_green.png").toUri());
         } catch (IOException ignored) {
             throw new MaednException("Could not load piece.png");
         }

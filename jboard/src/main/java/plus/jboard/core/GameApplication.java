@@ -35,6 +35,7 @@ public class GameApplication {
                         break;
                     }
                 }
+                System.out.println(Vector2D.of(e.getX(), e.getY()));
             }
 
             @Override
