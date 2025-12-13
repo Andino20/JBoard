@@ -1,11 +1,13 @@
 package plus.jboard.render;
 
+import plus.jboard.core.GameObject;
+
 import java.awt.*;
 import javax.swing.JPanel;
 import java.util.Iterator;
 
 public class RenderContext extends JPanel {
-    private Iterator<Drawable> renderObjects;
+    private Iterator<GameObject> renderObjects;
 
     public RenderContext() {
         this.setBackground(Color.WHITE);
@@ -26,7 +28,7 @@ public class RenderContext extends JPanel {
         renderObjects = null;
     }
 
-    public void render(Iterator<Drawable> renderObjects) {
+    public void render(Iterator<GameObject> renderObjects) {
         this.renderObjects = renderObjects;
         this.repaint();
     }

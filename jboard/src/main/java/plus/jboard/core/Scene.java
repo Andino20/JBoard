@@ -1,7 +1,5 @@
 package plus.jboard.core;
 
-import plus.jboard.render.Drawable;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,16 +7,23 @@ import java.util.TreeMap;
 
 public class Scene {
 
-    private final TreeMap<Integer, List<Drawable>> renderObjects = new TreeMap<>();
+    private final TreeMap<Integer, List<GameObject>> gameObjects = new TreeMap<>();
 
-    protected Iterator<Drawable> getRenderObjects() {
-        return renderObjects.values()
+    protected Iterator<GameObject> getGameObjects() {
+        return gameObjects.values()
                 .stream()
                 .flatMap(List::stream)
                 .iterator();
     }
 
-    public void addRenderObject(Drawable d, int zIndex) {
-        renderObjects.computeIfAbsent(zIndex, z -> new ArrayList<>()).add(d);
+    protected Iterator<GameObject> getGameObjectsReversed() {
+        return gameObjects.reversed().values()
+                .stream()
+                .flatMap(List::stream)
+                .iterator();
+    }
+
+    public void addGameObject(GameObject d, int zIndex) {
+        gameObjects.computeIfAbsent(zIndex, z -> new ArrayList<>()).add(d);
     }
 }
