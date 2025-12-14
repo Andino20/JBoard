@@ -47,6 +47,48 @@ public class MaednScene extends Scene {
             ))
     );
 
+    public Map<Integer, Vector2D> fieldToPixelMap = Map.ofEntries(
+            Map.entry(0, Vector2D.of(658, 247)),
+            Map.entry(1, Vector2D.of(593, 247)),
+            Map.entry(2, Vector2D.of(529, 247)),
+            Map.entry(3, Vector2D.of(464, 247)),
+            Map.entry(4, Vector2D.of(400, 247)),
+            Map.entry(5, Vector2D.of(400, 290)),
+            Map.entry(6, Vector2D.of(400, 333)),
+            Map.entry(7, Vector2D.of(400, 376)),
+            Map.entry(8, Vector2D.of(400, 419)),
+            Map.entry(9, Vector2D.of(337, 419)),
+            Map.entry(10, Vector2D.of(272, 419)),
+            Map.entry(11, Vector2D.of(272, 376)),
+            Map.entry(12, Vector2D.of(272, 333)),
+            Map.entry(13, Vector2D.of(272, 290)),
+            Map.entry(14, Vector2D.of(272, 247)),
+            Map.entry(15, Vector2D.of(206, 247)),
+            Map.entry(16, Vector2D.of(143, 247)),
+            Map.entry(17, Vector2D.of(79, 247)),
+            Map.entry(18, Vector2D.of(16, 247)),
+            Map.entry(19, Vector2D.of(16, 203)),
+            Map.entry(20, Vector2D.of(16, 160)),
+            Map.entry(21, Vector2D.of(79, 160)),
+            Map.entry(22, Vector2D.of(143, 160)),
+            Map.entry(23, Vector2D.of(206, 160)),
+            Map.entry(24, Vector2D.of(272, 160)),
+            Map.entry(25, Vector2D.of(272, 117)),
+            Map.entry(26, Vector2D.of(272, 75)),
+            Map.entry(27, Vector2D.of(272, 32)),
+            Map.entry(28, Vector2D.of(272, -10)),
+            Map.entry(29, Vector2D.of(337, -10)),
+            Map.entry(30, Vector2D.of(400, -10)),
+            Map.entry(31, Vector2D.of(400, 32)),
+            Map.entry(32, Vector2D.of(400, 75)),
+            Map.entry(33, Vector2D.of(400, 117)),
+            Map.entry(34, Vector2D.of(400, 160)),
+            Map.entry(35, Vector2D.of(464, 160)),
+            Map.entry(36, Vector2D.of(529, 160)),
+            Map.entry(37, Vector2D.of(593, 160)),
+            Map.entry(38, Vector2D.of(658, 160)),
+            Map.entry(39, Vector2D.of(658, 203))
+    );
 
     public static class Background extends GameObject {
         public Background() throws IOException {
@@ -102,7 +144,7 @@ public class MaednScene extends Scene {
                 hf[i].setPosition(homeToPixel.get(f.c).get(i));
                 break;
             }
-        }//TODO warum komisch wenn 2. Figur, geh einfach Heim verdammt
+        }
 
     }
 
@@ -113,49 +155,6 @@ public class MaednScene extends Scene {
     public class Figure extends GameObject {
         private final Color c;
         private int arr_pos;
-
-        private Map<Integer, Vector2D> fieldToPixelMap = Map.ofEntries(
-                Map.entry(0, Vector2D.of(658, 247)),
-                Map.entry(1, Vector2D.of(593, 247)),
-                Map.entry(2, Vector2D.of(529, 247)),
-                Map.entry(3, Vector2D.of(464, 247)),
-                Map.entry(4, Vector2D.of(400, 247)),
-                Map.entry(5, Vector2D.of(400, 290)),
-                Map.entry(6, Vector2D.of(400, 333)),
-                Map.entry(7, Vector2D.of(400, 376)),
-                Map.entry(8, Vector2D.of(400, 419)),
-                Map.entry(9, Vector2D.of(337, 419)),
-                Map.entry(10, Vector2D.of(272, 419)),
-                Map.entry(11, Vector2D.of(272, 376)),
-                Map.entry(12, Vector2D.of(272, 333)),
-                Map.entry(13, Vector2D.of(272, 290)),
-                Map.entry(14, Vector2D.of(272, 247)),
-                Map.entry(15, Vector2D.of(206, 247)),
-                Map.entry(16, Vector2D.of(143, 247)),
-                Map.entry(17, Vector2D.of(79, 247)),
-                Map.entry(18, Vector2D.of(16, 247)),
-                Map.entry(19, Vector2D.of(16, 203)),
-                Map.entry(20, Vector2D.of(16, 160)),
-                Map.entry(21, Vector2D.of(79, 160)),
-                Map.entry(22, Vector2D.of(143, 160)),
-                Map.entry(23, Vector2D.of(206, 160)),
-                Map.entry(24, Vector2D.of(272, 160)),
-                Map.entry(25, Vector2D.of(272, 117)),
-                Map.entry(26, Vector2D.of(272, 75)),
-                Map.entry(27, Vector2D.of(272, 32)),
-                Map.entry(28, Vector2D.of(272, -10)),
-                Map.entry(29, Vector2D.of(337, -10)),
-                Map.entry(30, Vector2D.of(400, -10)),
-                Map.entry(31, Vector2D.of(400, 32)),
-                Map.entry(32, Vector2D.of(400, 75)),
-                Map.entry(33, Vector2D.of(400, 117)),
-                Map.entry(34, Vector2D.of(400, 160)),
-                Map.entry(35, Vector2D.of(464, 160)),
-                Map.entry(36, Vector2D.of(529, 160)),
-                Map.entry(37, Vector2D.of(593, 160)),
-                Map.entry(38, Vector2D.of(658, 160)),
-                Map.entry(39, Vector2D.of(658, 203))
-        );
 
         public Figure(Color c) throws IOException {
             this.c = c;
@@ -181,10 +180,8 @@ public class MaednScene extends Scene {
             } else {
                 int nextpos = (arr_pos + dice) % 40;
                 if (fields[nextpos] == null || can_move(nextpos, c)) {
-                    fields[nextpos] = this;
-                    this.setPosition(fieldToPixelMap.get(arr_pos));
                     fields[arr_pos] = null;
-                    arr_pos = nextpos;
+                    changePos(nextpos);
                 }
             }
         }
@@ -207,15 +204,27 @@ public class MaednScene extends Scene {
             }
             if (fields[startpos] != null && fields[startpos].c == this.c) {
                 System.out.println("Figure cant move, move figure from start position first");
+            } else if (fields[startpos] != null) {
+                move_home(fields[startpos]);
+                changePos(startpos);
+                removeFromHome();
             } else {
-                fields[startpos] = this; //TODO um andere geschlagenen Figur kümmern
-                this.setPosition(fieldToPixelMap.get(startpos));
-                this.arr_pos = startpos;
-                Figure[] hf = home_figures.get(c);
-                for (int i = 0; i < hf.length; i++) {
-                    if (hf[i] == this) {
-                        hf[i] = null;
-                    }
+                changePos(startpos);
+                removeFromHome();
+            }
+        }
+
+        private void changePos(int startpos) {
+            fields[startpos] = this;
+            this.setPosition(fieldToPixelMap.get(startpos));
+            this.arr_pos = startpos;
+        }
+
+        private void removeFromHome() {
+            Figure[] hf = home_figures.get(c);
+            for (int i = 0; i < hf.length; i++) {
+                if (hf[i] == this) {
+                    hf[i] = null;
                 }
             }
         }
