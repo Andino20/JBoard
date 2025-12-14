@@ -1,11 +1,11 @@
 package plus.jboard.core;
 
+import plus.jboard.core.facade.MouseClickListener;
 import plus.jboard.math.Vector2D;
 import plus.jboard.render.RenderContext;
 
-import javax.swing.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 import java.util.Iterator;
 
 public class GameApplication {
@@ -18,46 +18,20 @@ public class GameApplication {
 
     public GameApplication(String title, int width, int height, Scene startingScene) {
         this.currentScene = startingScene;
-        JFrame frame = new JFrame(title);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(width, height);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        JFrame window = initFrame(title, width, height);
         renderer = new RenderContext();
-        renderer.addMouseListener(new MouseListener() {
+        renderer.addMouseListener((MouseClickListener) e -> notifyMouseClick(Vector2D.of(e.getX(), e.getY())));
+        window.add(renderer);
+    }
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                for (Iterator<GameObject> it = currentScene.getGameObjectsReversed(); it.hasNext(); ) {
-                    GameObject g = it.next();
-                    if (g.getBoundingBox().isInside(Vector2D.of(e.getX(), e.getY()))) {
-                        g.onMouseClick(Vector2D.of(e.getX(), e.getY()));
-                        break;
-                    }
-                }
+    private void notifyMouseClick(Vector2D position) {
+        for (Iterator<GameObject> it = currentScene.getGameObjectsReversed(); it.hasNext(); ) {
+            GameObject g = it.next();
+            if (g.getBoundingBox().isInside(position)) {
+                g.onMouseClick(position);
+                break;
             }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        });
-        frame.add(renderer);
+        }
     }
 
     public void run() {
@@ -74,7 +48,15 @@ public class GameApplication {
                 delta--;
             }
         }
+    }
 
+    private static JFrame initFrame(String title, int width, int height) {
+        JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        return frame;
     }
 
 }
