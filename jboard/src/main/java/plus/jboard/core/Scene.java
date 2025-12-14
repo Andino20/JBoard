@@ -9,11 +9,11 @@ public class Scene {
 
     private final TreeMap<Integer, List<GameObject>> gameObjects = new TreeMap<>();
 
-    protected Iterator<GameObject> getGameObjects() {
+    protected List<GameObject> getGameObjects() {
         return gameObjects.values()
                 .stream()
                 .flatMap(List::stream)
-                .iterator();
+                .toList();
     }
 
     protected Iterator<GameObject> getGameObjectsReversed() {

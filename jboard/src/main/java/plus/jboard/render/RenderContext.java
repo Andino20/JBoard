@@ -1,13 +1,13 @@
 package plus.jboard.render;
 
-import plus.jboard.core.GameObject;
-
-import java.awt.*;
 import javax.swing.JPanel;
-import java.util.Iterator;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.List;
 
 public class RenderContext extends JPanel {
-    private Iterator<GameObject> renderObjects;
+    private List<RenderObject> renderObjects;
 
     public RenderContext() {
         this.setBackground(Color.WHITE);
@@ -21,14 +21,14 @@ public class RenderContext extends JPanel {
         if (renderObjects == null)
             return;
 
-        while (renderObjects.hasNext()) {
-            renderObjects.next().draw(g2d);
+        for (RenderObject renderObject : renderObjects) {
+            renderObject.draw(g2d);
         }
 
         renderObjects = null;
     }
 
-    public void render(Iterator<GameObject> renderObjects) {
+    public void render(List<RenderObject> renderObjects) {
         this.renderObjects = renderObjects;
         this.repaint();
     }

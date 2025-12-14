@@ -3,25 +3,28 @@ package plus.jboard.core;
 import plus.jboard.core.facade.MouseClickListener;
 import plus.jboard.math.Vector2D;
 import plus.jboard.render.RenderContext;
+import plus.jboard.render.RenderObject;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import java.util.Iterator;
+import java.util.List;
 
 public class GameApplication {
 
     private static final double FPS = 60.0;
     private static final double FRAME_TIME = 1_000_000_000 / FPS;
 
-    private final RenderContext renderer;
+    private RenderContext renderer;
     private final Scene currentScene;
 
     public GameApplication(String title, int width, int height, Scene startingScene) {
         this.currentScene = startingScene;
-        JFrame window = initFrame(title, width, height);
-        renderer = new RenderContext();
-        renderer.addMouseListener((MouseClickListener) e -> notifyMouseClick(Vector2D.of(e.getX(), e.getY())));
-        window.add(renderer);
+        SwingUtilities.invokeLater(() -> {
+            JFrame window = initFrame(title, width, height);
+            renderer = new RenderContext();
+            renderer.addMouseListener((MouseClickListener) e -> notifyMouseClick(Vector2D.of(e.getX(), e.getY())));
+            window.add(renderer);
+        });
     }
 
     private void notifyMouseClick(Vector2D position) {
@@ -44,7 +47,10 @@ public class GameApplication {
             lastTime = now;
 
             while (delta >= 1) {
-                renderer.render(currentScene.getGameObjects());
+                List<RenderObject> renderObjects = currentScene.getGameObjects().stream()
+                        .map(GameObject::toRenderObject)
+                        .toList();
+                SwingUtilities.invokeLater(() -> renderer.render(renderObjects));
                 delta--;
             }
         }
