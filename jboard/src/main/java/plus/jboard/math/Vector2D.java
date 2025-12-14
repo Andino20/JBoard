@@ -23,6 +23,10 @@ public record Vector2D(double x, double y) {
         return new Vector2D(-x, -y);
     }
 
+    public static Vector2D copyOf(Vector2D other) {
+        return new Vector2D(other.x, other.y);
+    }
+
     @Override
     public String toString() {
         return "(" + x + ", " + y + ")";
