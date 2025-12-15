@@ -9,10 +9,14 @@ import java.net.URI;
 
 public class Sprite {
 
-    private final BufferedImage image;
+    private final Image image;
 
     public Sprite(URI uri) throws IOException {
         image = ImageIO.read(new File(uri));
+    }
+
+    public Sprite(Image image) {
+        this.image = image;
     }
 
     public Image getImage() {
@@ -20,10 +24,10 @@ public class Sprite {
     }
 
     public int getWidth() {
-        return image.getWidth();
+        return image.getWidth(null);
     }
 
     public int getHeight() {
-        return image.getHeight();
+        return image.getHeight(null);
     }
 }

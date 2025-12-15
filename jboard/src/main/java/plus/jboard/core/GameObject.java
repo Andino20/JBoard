@@ -8,7 +8,7 @@ import plus.jboard.render.SpriteRenderObject;
 
 import java.awt.Graphics2D;
 
-public abstract class GameObject implements RenderObject {
+public class GameObject implements RenderObject {
     private Vector2D position;
     protected Sprite sprite;
 
