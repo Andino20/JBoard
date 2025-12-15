@@ -11,7 +11,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -232,20 +231,10 @@ public class MaednScene extends Scene {
     }
 
     public MaednScene() throws IOException {
-        home_figures = new HashMap<>();
-        for (Color c : homeToPixel.keySet()) {
-            home_figures.put(c, new Figure[4]);
-            List<Vector2D> points = homeToPixel.get(c);
-            for (int i = 0; i < points.size(); i++) {
-                Figure p = new Figure(c);
-                p.setPosition(points.get(i).add(Vector2D.of(4, -20)));
-                this.addGameObject(p, 1);
-                home_figures.get(c)[i] = p;
-            }
-        }
-
-        Dice d = new Dice();
-        this.addGameObject(d, 1);
+        Die d6 = new Die();
+        Board board = new Board(d6);
+        board.getAllFigures().forEach(f -> this.addGameObject(f, 1));
+        addGameObject(d6, 2);
 
         Background bg = new Background();
         this.addGameObject(bg, 0);
