@@ -1,0 +1,51 @@
+package plus.sprak.app;
+
+import plus.jboard.core.GameObject;
+import plus.jboard.math.Vector2D;
+import plus.jboard.render.Sprite;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.function.Consumer;
+
+public class Piece extends GameObject {
+    private final PieceColor color;
+    private int fieldPosition;
+    private Consumer<Piece> moveListener;
+
+    public Piece(PieceColor color) throws IOException {
+        this.color = color;
+        this.fieldPosition = 0;
+
+        String filename = "";
+        switch (color) {
+            case WHITE -> filename = "piece_white.png";//TODO: ergänzen
+            case BLACK -> filename = "piece_black.png";
+
+        }
+        this.sprite = new Sprite(Path.of("src", "main", "resources", filename).toUri());
+    }
+    @Override
+    public void onMouseClick(Vector2D position) {
+        if (moveListener != null) {
+            moveListener.accept(this);
+        }
+    }
+
+    public PieceColor getColor() {
+        return color;
+    }
+
+    public int getFieldPosition() {
+        return fieldPosition;
+    }
+
+    public void setFieldPosition(int fieldPosition) {
+        this.fieldPosition = fieldPosition;
+    }
+
+    public void setMoveListener(Consumer<Piece> listener) {
+        this.moveListener = listener;
+    }
+
+}
