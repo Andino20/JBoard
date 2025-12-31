@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package net.protocol.session;
+
+option java_package = "plus.jboard.net.protocol.session";
+option java_multiple_files = true;
+option java_outer_classname = "SessionHandshakeProto";
+
+// ─────────────────────────────────────────────────────────────
+// Top-level envelope for all handshake messages
+// ─────────────────────────────────────────────────────────────
+message HandshakeEnvelope {
+  uint32 protocol_version = 1;
+
+  oneof payload {
+    ClientJoinRequest client_join = 2;
+    ServerJoinAccepted server_accepted = 3;
+    ServerJoinRejected server_rejected = 4;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Client → Server
+// ─────────────────────────────────────────────────────────────
+message ClientJoinRequest {}
+
+// ─────────────────────────────────────────────────────────────
+// Server → Client (success)
+// ─────────────────────────────────────────────────────────────
+message ServerJoinAccepted {
+  string player_id = 1;     // UUID (canonical string form)
+}
+
+// ─────────────────────────────────────────────────────────────
+// Server → Client (failure)
+// ─────────────────────────────────────────────────────────────
+message ServerJoinRejected {
+  RejectReason reason = 1;
+  string message = 2;       // human-readable, optional
+}
+
+enum RejectReason {
+  REJECT_REASON_UNSPECIFIED = 0;
+  INVALID_REQUEST = 1;
+  SESSION_FULL = 2;
+  VERSION_MISMATCH = 3;
+  INTERNAL_ERROR = 4;
+}
