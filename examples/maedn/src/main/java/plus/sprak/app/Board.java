@@ -31,23 +31,48 @@ public class Board {
     }
 
     public void triggerMove(Figure f) {
+        if(d6.isUsed()){
+            return;
+        }
         int dice = d6.getRoll();
         if (dice != 6 && f.getFieldPosition() < 0)
             return;
 
-        int nextPos;
+        if (f.getFieldPosition() > 99 && ((dice + f.getFieldPosition()) % 100 > 3 || goals.get(f.getColor()) == null))
+            return;
+
+        int nextPos = (f.getFieldPosition() + dice) % NUM_FIELDS;
         if (dice == 6 && f.getFieldPosition() < 0) {
             nextPos = getStartPositionByColor(f.getColor());
-        } else {
-            nextPos = (f.getFieldPosition() + dice) % NUM_FIELDS;
+        } else if (nextPos >= getStartPositionByColor(f.getColor()) && nextPos <= getStartPositionByColor(f.getColor()) + 6 && (nextPos % 10) < dice) { //move into house
+            nextPos = 100 + (f.getFieldPosition() + dice) % 10;
+            if (goals.get(f.getColor())[nextPos%100] == null) { //check for space in goal, go around otherwise
+                move(f, nextPos);
+            } else {
+                nextPos = getStartPositionByColor(f.getColor()) + nextPos%100;
+            }
+        } else if (f.getFieldPosition() > 99) { //move inside goal
+            nextPos = f.getFieldPosition() + dice;
+            if (goals.get(f.getColor())[nextPos%100] == null) {
+                move(f, nextPos);
+            }
+            else{
+                return;
+            }
         }
 
-        if (fields[nextPos] == null) {
-            move(f, nextPos); // no piece in the way, just move
-        } else if (fields[nextPos].getColor() != f.getColor()) {
-            move(fields[nextPos], -1); // move other piece out of the way
-            move(f, nextPos);
+        if (f.getFieldPosition() < 100) { //normal move, not in goal
+            if (fields[nextPos] == null) {
+                move(f, nextPos); // no piece in the way, just move
+            } else if (fields[nextPos].getColor() != f.getColor()) {
+                move(fields[nextPos], -1); // move other piece out of the way
+                move(f, nextPos);
+            } else {
+                return;
+            }
         }
+
+        d6.use();
     }
 
     public void move(Figure f, int newPosition) {
@@ -57,19 +82,40 @@ public class Board {
                 home[i] = f;
                 f.setPosition(Constants.homeToPixel.get(f.getColor()).get(i));
             });
-        } else { // move to field
+        } else if (newPosition > 99){ // move in goal
+            Figure[] goal = goals.get(f.getColor());
+            int i = newPosition % 100;
+            if (goal[i] != null) {
+                return;
+            }
+            goal[i] = f;
+            f.setPosition(Constants.goalToPixel.get(f.getColor()).get(i));
+        }
+        else { // move to field
             fields[newPosition] = f;
             f.setPosition(Constants.fieldToPixel.get(newPosition));
         }
 
         // Clean up behind us
-        if (f.getFieldPosition() >= 0) {
+        if (f.getFieldPosition() >= 0 && f.getFieldPosition() < 100) {
             this.fields[f.getFieldPosition()] = null;
-        } else {
+        } else if (f.getFieldPosition() == -1) {
             Figure[] home = this.homes.get(f.getColor());
             for (int i = 0; i < home.length; i++) {
                 if (home[i] == f) {
                     home[i] = null;
+                }
+            }
+        } else {
+            Figure[] goal = this.goals.get(f.getColor());
+            for (int i = 0; i < goal.length; i++) {
+                if (goal[i] == f && newPosition != i) {
+                    goal[i] = null;
+                }
+            }
+            for (int i = 0; i < NUM_FIELDS; i++) {
+                if (this.fields[i] == f) {
+                    this.fields[i] = null;
                 }
             }
         }

@@ -36,6 +36,33 @@ public class Constants {
             ))
     );
 
+    public static final Map<PieceColor, List<Vector2D>> goalToPixel = Map.ofEntries(
+            Map.entry(PieceColor.BLUE, List.of(
+                    Vector2D.of(79, 203),
+                    Vector2D.of(143, 203),
+                    Vector2D.of(206, 203),
+                    Vector2D.of(272, 203)
+            )),
+            Map.entry(PieceColor.GREEN, List.of(
+                    Vector2D.of(337, 32),
+                    Vector2D.of(337, 75),
+                    Vector2D.of(337, 117),
+                    Vector2D.of(337, 160)
+            )),
+            Map.entry(PieceColor.RED, List.of(
+                    Vector2D.of(593, 203),
+                    Vector2D.of(529, 203),
+                    Vector2D.of(464, 203),
+                    Vector2D.of(400, 203)
+            )),
+            Map.entry(PieceColor.YELLOW, List.of(
+                    Vector2D.of(337, 376),
+                    Vector2D.of(337, 333),
+                    Vector2D.of(337, 290),
+                    Vector2D.of(337, 247)
+            ))
+    );
+
     public static final Map<Integer, Vector2D> fieldToPixel = Map.ofEntries(
             Map.entry(0, Vector2D.of(658, 247)),
             Map.entry(1, Vector2D.of(593, 247)),
