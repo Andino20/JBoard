@@ -2,8 +2,7 @@ package plus.jboard.render;
 
 import plus.jboard.math.Vector2D;
 
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public record TextRenderObject(Vector2D position, String text) implements RenderObject {
 

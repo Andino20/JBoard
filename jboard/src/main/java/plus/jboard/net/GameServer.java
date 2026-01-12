@@ -1,12 +1,11 @@
-package plus.jboard.net.server;
-
-import plus.jboard.net.NetworkConnection;
+package plus.jboard.net;
 
 import java.util.function.Consumer;
 
-public interface SessionServer {
+public interface GameServer {
 
     void onNewClient(Consumer<NetworkConnection> handler);
 
     void start();
+
 }
