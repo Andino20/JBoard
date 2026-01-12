@@ -8,7 +8,6 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
-    id("com.google.protobuf") version "0.9.6"
 }
 
 repositories {
@@ -21,8 +20,6 @@ dependencies {
     testImplementation libs.junit.jupiter
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    implementation 'com.google.protobuf:protobuf-java:4.33.1'
 
     implementation 'ch.qos.logback:logback-classic:1.5.23'
     implementation 'org.slf4j:slf4j-api:2.0.17'
