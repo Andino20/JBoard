@@ -24,6 +24,8 @@ public class Constants {
             ))
     );
 
+    public static final Map<Integer, Vector2D> columnPositionToPixel = Map.ofEntries();
+
     public static final Map<Integer, Vector2D> fieldToPixel = Map.ofEntries(
             Map.entry(0, Vector2D.of(658, 247)),
             Map.entry(1, Vector2D.of(593, 247)),

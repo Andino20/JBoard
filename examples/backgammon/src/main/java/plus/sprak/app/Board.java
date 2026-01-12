@@ -1,15 +1,20 @@
 package plus.sprak.app;
 
+import plus.jboard.math.Vector2D;
+
 import java.io.IOException;
 import java.util.*;
 
 public class Board {
-
+    //Todo: vielleicht text im window zeichen lassen
     private static final int NUM_FIELDS = 24;
     //todo: kann fields array 2 werte halten? also ein piece und wieviele pices oder halt meherer pieces?
-    private final List<Piece>[] fields = new List[NUM_FIELDS];//
+    private final Stack<Piece>[] fields = new Stack[NUM_FIELDS];
     private final Map<PieceColor, Piece[]> homes = new EnumMap<>(PieceColor.class);
     //private final Map<pieceColor, Piece[]> goals = new EnumMap<>(pieceColor.class);
+
+    private final Stack<Piece> blackHome = new Stack<>();
+    private final Stack<Piece> whiteHome = new Stack<>();
 
     private final List<Piece> pieces = new ArrayList<>();
     private final Die d6;
@@ -19,18 +24,24 @@ public class Board {
         for (PieceColor c : PieceColor.values()) {
             //goals.putIfAbsent(c, new Piece[4]);
             //Piece[] homePieces = homes.computeIfAbsent(c, k -> new Piece[4]);
+
+            //anfangspositionen hinzufügen
+
             int[] sp = getStartPositionsByColor(c);
+
+            // sp = 4 (mit 5 pieces), 6 (mit 3 pieces)
             for (int pos : sp) {
                 Piece p = new Piece(c);
-                move(p, pos);
+                move(p, fields[pos]);
 
                 p.setMoveListener(this::triggerMove);
                 pieces.add(p);
             }
 
         }
+        //board liste initialisieren
         for (int i = 0; i < NUM_FIELDS; i++) {
-            fields[i] = new ArrayList<>();
+            fields[i] = new Stack<>();
         }
     }
 
@@ -39,41 +50,66 @@ public class Board {
         int change = 1; // Richtung ändert sich in Abhängigkeit von der Farbe
         if (p.getColor() == PieceColor.BLACK)
             change = -1;
-        int nextPos = (p.getFieldPosition() + dice*change) % NUM_FIELDS;
-
-        if (fields[nextPos] == null ||fields[nextPos].getFirst().getColor() == p.getColor()) {
-            move(p, nextPos); // no piece in the way, just move
-        } else if (fields[nextPos].getFirst().getColor() != p.getColor()) {
-            move(fields[nextPos].getFirst(), -1); // move other piece out of the way, nur wenn es nur ein piece ist
-            move(p, nextPos);
+        int nextPos = (p.getFieldPosition() + dice*change) % NUM_FIELDS; //TODO: MOdulu bei Minus überprüfen
+        Stack<Piece> destinedPosition = fields[nextPos];
+        if (destinedPosition.isEmpty() ||destinedPosition.getFirst().getColor() == p.getColor()) {
+            move(p, destinedPosition); // no piece in the way, just move
+        } else if (destinedPosition.getFirst().getColor() != p.getColor()) {
+            if (destinedPosition.size()==1) {//ein andersfarbiges Piece
+                if (destinedPosition.getFirst().getColor() == PieceColor.WHITE) {
+                    move(destinedPosition.getFirst(), whiteHome); // move other piece out of the way
+                } else {
+                    move(destinedPosition.getFirst(), blackHome); //move other piece out of the way
+                }
+                move(p, destinedPosition);
+            }
+            else {
+                System.out.println("Cant move Piece to this position");
+                return;}
+        }else{
+            move(p, destinedPosition);
         }
     }
 //todo: überarbeiten weil meherer pieces an gleicher Psition sein können
-    public void move(Piece p, int newPosition) {
-        if (newPosition < 0) { // move to home
-            Piece[] home = homes.get(p.getColor());
-            findFreeHomeSpot(p.getColor()).ifPresent(i -> {
-                home[i] = p;
-                p.setPosition(Constants.homeToPixel.get(p.getColor()).get(i));
-            });
-        } else { // move to field
-            fields[newPosition].add(p);
-            p.setPosition(Constants.fieldToPixel.get(newPosition));
-        }
+    public void move(Piece p, Stack<Piece> destinedPosition) {
+        Stack<Piece> oldposition = fields[p.getFieldPosition()];
 
-        // Clean up behind us todo: machen
-        if (p.getFieldPosition() >= 0) {
-            this.fields[p.getFieldPosition()] = null;
-        } else {
-            Piece[] home = this.homes.get(p.getColor());
-            for (int i = 0; i < home.length; i++) {
-                if (home[i] == p) {
-                    home[i] = null;
+        if (destinedPosition == whiteHome || destinedPosition == blackHome) {
+            switch (p.getColor()) {
+                case WHITE -> p.setFieldPosition(-1);
+                case BLACK -> p.setFieldPosition(24);
+            }
+        }else{
+            for(int i = 0; i < NUM_FIELDS; i++) {
+                if (fields[i] == destinedPosition) {//eventuell equals statt ==
+                    p.setFieldPosition(i);
+                    break;
                 }
             }
         }
 
-        p.setFieldPosition(newPosition);
+        destinedPosition.push(p);
+        oldposition.pop();//Todo: falls fehler, aufpassen ob wir mehr als höchtes element bewegen
+        updateScreenPosition(p);
+    }
+
+    private void updateScreenPosition(Piece p) {
+        Stack<Piece> currentColumn;
+        switch (p.getFieldPosition()) {
+            case -1 -> currentColumn = whiteHome;
+            case 24 -> currentColumn = blackHome;
+            default -> currentColumn = fields[p.getFieldPosition()];
+        }
+
+        Vector2D columnBase = Constants.columnPositionToPixel.get(p.getFieldPosition());
+        int columnOffset = Math.max(0, currentColumn.size());
+        //int offsetMod
+        if (p.getFieldPosition() < 12) {
+            columnOffset *= -1;//Todo: position an seiten?
+        }else{
+            columnOffset = 1;
+        }
+        p.setPosition(columnBase.add(Vector2D.of(0, 32).scale(columnOffset)));
     }
 
     public List<Piece> getAllPieces() {

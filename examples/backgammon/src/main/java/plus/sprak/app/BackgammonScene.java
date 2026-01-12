@@ -19,8 +19,9 @@ public class BackgammonScene extends Scene {
             this.sprite = new Sprite(img.getScaledInstance(720, 480, Image.SCALE_SMOOTH));
         }
     }
-    public BackgammonScene() {
-
+    public BackgammonScene() throws IOException {
+        Background bg = new Background();
+        this.addGameObject(bg, 0);
     }
 
 }
