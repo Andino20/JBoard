@@ -1,13 +1,13 @@
 package plus.jboard.core;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import javax.swing.*;
+import java.util.*;
 import java.util.List;
-import java.util.TreeMap;
 
 public class Scene {
 
     private final TreeMap<Integer, List<GameObject>> gameObjects = new TreeMap<>();
+    private JPanel uiPanel;
 
     protected List<GameObject> getGameObjects() {
         return gameObjects.values()
@@ -21,6 +21,14 @@ public class Scene {
                 .stream()
                 .flatMap(List::stream)
                 .iterator();
+    }
+
+    protected Optional<JPanel> getUI() {
+        return Optional.ofNullable(uiPanel);
+    }
+
+    public void setUI(JPanel ui) {
+        this.uiPanel = ui;
     }
 
     public void addGameObject(GameObject d, int zIndex) {

@@ -1,0 +1,16 @@
+package plus.jboard.net.session.protocol;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@Builder
+public class ServerAcceptMessage extends HandshakeMessage {
+
+    private UUID clientId;
+
+}

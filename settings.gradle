@@ -12,3 +12,5 @@ plugins {
 
 rootProject.name = 'JBoard'
 include('jboard', 'examples:maedn')
+
+include 'examples:networking'
