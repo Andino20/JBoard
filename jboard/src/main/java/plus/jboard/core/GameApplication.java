@@ -1,6 +1,8 @@
 package plus.jboard.core;
 
 import lombok.Getter;
+import plus.jboard.core.facade.MouseClickListener;
+import plus.jboard.math.Vector2D;
 import plus.jboard.net.NetworkMessage;
 import plus.jboard.net.handler.MessageCollector;
 import plus.jboard.net.handler.MessageDispatcher;
@@ -8,6 +10,7 @@ import plus.jboard.render.RenderContext;
 import plus.jboard.render.RenderObject;
 
 import javax.swing.*;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,6 +40,7 @@ public class GameApplication {
         SwingUtilities.invokeLater(() -> {
             window = initFrame(title, width, height);
             renderer = new RenderContext();
+            renderer.addMouseListener((MouseClickListener) e -> notifyMouseClick(Vector2D.of(e.getX(), e.getY())));
             window.add(renderer);
             currentScene.getUI().ifPresent(window::add);
         });
@@ -53,6 +57,16 @@ public class GameApplication {
             window.revalidate();
             window.repaint();
         });
+    }
+
+    private void notifyMouseClick(Vector2D position) {
+        for (Iterator<GameObject> it = currentScene.getGameObjectsReversed(); it.hasNext(); ) {
+            GameObject g = it.next();
+            if (g.getBoundingBox().isInside(position)) {
+                g.onMouseClick(position);
+                break;
+            }
+        }
     }
 
     public void run() {
