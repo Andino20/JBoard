@@ -15,19 +15,20 @@ public class Die extends GameObject {
     private Random rng;
     private int lastRoll = 6;
     private boolean used = false;
+    private final boolean HOST;
 
-    public Die() {
+    public Die(boolean host) {
+        this.HOST = host;
         this.setPosition(Vector2D.of(150, 20));
         rng = new Random();
     }
 
-    public Die(Random rng) {
-        this();
-        this.rng = rng;
-    }
-
     @Override
     public void onMouseClick(Vector2D position) {
+        if(!HOST){
+            //TODO message("Die");
+            return;
+        }
         if(this.lastRoll == 0) {
             return;
         }
@@ -40,6 +41,7 @@ public class Die extends GameObject {
     public void roll() {
         this.lastRoll = rng.nextInt(6) + 1;
         this.used = false;
+        //TODO broadcast(this);
     }
 
     public void use() {this.used = true;}
