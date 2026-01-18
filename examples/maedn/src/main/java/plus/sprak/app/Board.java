@@ -6,6 +6,7 @@ import java.util.*;
 public class Board {
 
     private static final int NUM_FIELDS = 40;
+    private final boolean HOST;
 
     private final Figure[] fields = new Figure[NUM_FIELDS];
     private final Map<PieceColor, Figure[]> homes = new EnumMap<>(PieceColor.class);
@@ -14,8 +15,9 @@ public class Board {
     private final List<Figure> figures = new ArrayList<>();
     private final Die d6;
 
-    public Board(Die d6) throws IOException {
+    public Board(Die d6, boolean host) throws IOException {
         this.d6 = d6;
+        this.HOST = host;
         for (PieceColor c : PieceColor.values()) {
             goals.putIfAbsent(c, new Figure[4]);
             Figure[] homeFigures = homes.computeIfAbsent(c, k -> new Figure[4]);
@@ -31,6 +33,10 @@ public class Board {
     }
 
     public void triggerMove(Figure f) {
+        if(!HOST){
+            //TODO message(f);
+            return;
+        }
         if(d6.isUsed()){
             return;
         }
@@ -121,6 +127,9 @@ public class Board {
         }
 
         f.setFieldPosition(newPosition);
+        if(HOST){
+            //TODO broadcast(move(Figure f, int newPosition))
+        }
     }
 
     public List<Figure> getAllFigures() {
