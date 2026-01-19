@@ -8,7 +8,7 @@ public class App {
 
     public static void main(String[] args) {
         GameApplication app = new GameApplication("Networking Example", 720, 480, new DefaultScene());
-        MainMenuScene mainMenu = new MainMenuScene();
+        MainMenuScene mainMenu = new MainMenuScene(new DefaultScene());
         app.switchScenes(mainMenu);
         app.run();
     }

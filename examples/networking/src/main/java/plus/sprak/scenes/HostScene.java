@@ -1,21 +1,29 @@
 package plus.sprak.scenes;
 
+import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
 import plus.jboard.net.session.HostSession;
+import plus.sprak.messages.GameStartMessage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.UUID;
 
 public class HostScene extends Scene {
 
     private final HostSession session;
+    private final Scene nextScene;
+
+    private JButton startButton;
+
     private DefaultListModel<String> playerListModel;
 
-    public HostScene(HostSession session) {
+    public HostScene(HostSession session, Scene nextScene) {
         this.session = session;
-        session.onPlayerJoin(id -> addPlayer(id.toString()));
+        this.nextScene = nextScene;
 
+        session.onPlayerJoin(this::onPlayerJoin);
         init();
     }
 
@@ -45,8 +53,16 @@ public class HostScene extends Scene {
         scrollPane.setPreferredSize(new Dimension(200, 120));
 
         gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.insets = new Insets(0, 0, 15, 0);
         root.add(scrollPane, gbc);
+
+        startButton = new JButton("Start");
+        startButton.setEnabled(false);
+        startButton.addActionListener(e -> GameApplication.getInstance().switchScenes(nextScene));
+
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        root.add(startButton, gbc);
 
         setUI(root);
     }
@@ -57,8 +73,13 @@ public class HostScene extends Scene {
         }
     }
 
-    public void removePlayer(String name) {
-        SwingUtilities.invokeLater(() -> playerListModel.removeElement(name));
+
+    private void onPlayerJoin(UUID id) {
+        this.addPlayer(id.toString());
+        if (session.isFull()) {
+            this.startButton.setEnabled(true);
+            this.session.broadcast(new GameStartMessage());
+        }
     }
 
 }

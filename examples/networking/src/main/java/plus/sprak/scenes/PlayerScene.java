@@ -1,17 +1,25 @@
 package plus.sprak.scenes;
 
+import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
+import plus.jboard.net.NetworkEnvelope;
+import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.PlayerSession;
+import plus.sprak.messages.GameStartMessage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class PlayerScene extends Scene {
+public class PlayerScene extends Scene implements MessageHandler<GameStartMessage> {
+
+    private final Scene nextScene;
 
     private JLabel centerText;
 
-    public PlayerScene(PlayerSession session) {
+    public PlayerScene(PlayerSession session, Scene nextScene) {
+        this.nextScene = nextScene;
+
         init();
         session.onJoinSuccess(id -> SwingUtilities.invokeLater(() -> centerText.setText(String.format("You are %s!", id))));
         session.start();
@@ -40,6 +48,16 @@ public class PlayerScene extends Scene {
         root.add(centerText, gbc);
 
         setUI(root);
+    }
+
+    @Override
+    public Class<GameStartMessage> getAssociatedMessageType() {
+        return GameStartMessage.class;
+    }
+
+    @Override
+    public void handle(NetworkEnvelope<GameStartMessage> messageContext) {
+        GameApplication.getInstance().switchScenes(nextScene);
     }
 
 }

@@ -14,9 +14,12 @@ import java.awt.*;
 
 public class MainMenuScene extends Scene {
 
+    private final Scene gameScene;
     private final JPanel root;
 
-    public MainMenuScene() {
+    public MainMenuScene(Scene gameScene) {
+        this.gameScene = gameScene;
+
         root = new JPanel(new GridBagLayout());
         root.setBorder(new EmptyBorder(20, 20, 20, 20));
 
@@ -77,7 +80,7 @@ public class MainMenuScene extends Scene {
             session.onPlayerJoin(id -> System.out.printf("Player %s joined!%n", id));
             GameApplication.getInstance().addUpdatable(session);
             session.start();
-            HostScene lobby = new HostScene(session);
+            HostScene lobby = new HostScene(session, gameScene);
             GameApplication.getInstance().switchScenes(lobby);
         }
     }
@@ -106,7 +109,7 @@ public class MainMenuScene extends Scene {
                     .targetHost(ip)
                     .targetPort(Integer.parseInt(portText))
                     .build());
-            PlayerScene lobby = new PlayerScene(session);
+            PlayerScene lobby = new PlayerScene(session, gameScene);
             GameApplication.getInstance().switchScenes(lobby);
         }
     }
