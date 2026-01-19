@@ -5,21 +5,20 @@ import plus.jboard.core.GameApplication;
 import plus.jboard.core.Updatable;
 import plus.jboard.net.GameServer;
 import plus.jboard.net.NetworkConnection;
+import plus.jboard.net.NetworkEnvelope;
+import plus.jboard.net.NetworkMessage;
 import plus.jboard.net.async.AsyncGameServer;
 import plus.jboard.net.handler.MessageDispatcher;
 import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.protocol.HostHandshakeProtocol;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 @Slf4j
-public class HostSession implements MessageHandler<SessionMessage>, Updatable {
+public class HostSession implements Session, MessageHandler<SessionMessage>, Updatable {
 
     private final HostConfig config;
     private final GameServer server;
@@ -61,8 +60,8 @@ public class HostSession implements MessageHandler<SessionMessage>, Updatable {
     }
 
     @Override
-    public void handle(SessionMessage msg) {
-        log.info("Received Session Message: {}", msg.getMessage());
+    public void handle(NetworkEnvelope<SessionMessage> envelope) {
+        log.info("Received Session Message: {}", envelope.message());
     }
 
     private void handleClient(NetworkConnection connection) {
@@ -81,4 +80,14 @@ public class HostSession implements MessageHandler<SessionMessage>, Updatable {
         protocol.start();
     }
 
+    @Override
+    public void broadcast(NetworkMessage message) {
+        players.values().forEach(channel -> channel.send(message));
+    }
+
+    @Override
+    public void unicast(UUID target, NetworkMessage message) {
+        if (players.containsKey(target))
+            players.get(target).send(message);
+    }
 }

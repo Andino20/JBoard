@@ -3,6 +3,7 @@ package plus.jboard.core;
 import lombok.Getter;
 import plus.jboard.core.facade.MouseClickListener;
 import plus.jboard.math.Vector2D;
+import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.NetworkMessage;
 import plus.jboard.net.handler.MessageCollector;
 import plus.jboard.net.handler.MessageDispatcher;
@@ -107,10 +108,10 @@ public class GameApplication {
      * if an appropriate one for that type of message is registered with the dispatcher.
      */
     private void processNetworkMessages() {
-        NetworkMessage msg;
+        NetworkEnvelope<NetworkMessage> envelope;
         int counter = 0;
-        while ((msg = messageCollector.poll()) != null && counter < 10) {
-            messageDispatcher.dispatch(msg);
+        while ((envelope = messageCollector.poll()) != null && counter < 10) {
+            messageDispatcher.dispatch(envelope);
             counter++;
         }
     }

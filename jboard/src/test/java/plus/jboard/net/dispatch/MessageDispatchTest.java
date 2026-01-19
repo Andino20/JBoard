@@ -2,6 +2,7 @@ package plus.jboard.net.dispatch;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageDispatcher;
 import plus.jboard.net.handler.MessageHandler;
 
@@ -24,8 +25,8 @@ class MessageDispatchTest {
         }
 
         @Override
-        public void handle(GameMessage msg) {
-            callback.accept(msg);
+        public void handle(NetworkEnvelope<GameMessage> envelope) {
+            callback.accept(envelope.message());
         }
 
     }
@@ -44,8 +45,8 @@ class MessageDispatchTest {
         }
 
         @Override
-        public void handle(SessionMessage msg) {
-            this.callback.accept(msg);
+        public void handle(NetworkEnvelope<SessionMessage> envelope) {
+            this.callback.accept(envelope.message());
         }
 
     }
@@ -63,7 +64,7 @@ class MessageDispatchTest {
         dispatcher.register(gameHandler);
         dispatcher.register(sessionHandler);
 
-        dispatcher.dispatch(new SessionMessage(10));
+        dispatcher.dispatch(new NetworkEnvelope<>(null, new SessionMessage(10)));
         Assertions.assertTrue(success.get());
     }
 

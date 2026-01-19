@@ -1,14 +1,15 @@
 package plus.jboard.net.handler;
 
+import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.NetworkMessage;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MessageCollector implements MessageHandler<NetworkMessage> {
 
-    private final ConcurrentLinkedQueue<NetworkMessage> messageQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<NetworkEnvelope<NetworkMessage>> messageQueue = new ConcurrentLinkedQueue<>();
 
-    public NetworkMessage poll() {
+    public NetworkEnvelope<NetworkMessage> poll() {
         return messageQueue.poll();
     }
 
@@ -18,9 +19,9 @@ public class MessageCollector implements MessageHandler<NetworkMessage> {
     }
 
     @Override
-    public void handle(NetworkMessage msg) {
-        if (msg != null)
-            messageQueue.add(msg);
+    public void handle(NetworkEnvelope<NetworkMessage> envelope) {
+        if (envelope != null)
+            messageQueue.add(envelope);
     }
 
 }

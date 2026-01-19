@@ -2,6 +2,7 @@ package plus.jboard.net.session.protocol;
 
 import lombok.extern.slf4j.Slf4j;
 import plus.jboard.net.NetworkConnection;
+import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
 
 import java.util.Objects;
@@ -32,9 +33,9 @@ public class PlayerHandshakeProtocol implements MessageHandler<HandshakeMessage>
     }
 
     @Override
-    public void handle(HandshakeMessage msg) {
+    public void handle(NetworkEnvelope<HandshakeMessage> msg) {
         if (Objects.requireNonNull(state) == HandshakeState.CONNECTED) {
-            handleServerResponse(msg);
+            handleServerResponse(msg.message());
         } else {
             log.error("Received unexpected host message: {}", msg);
             throw new IllegalStateException("Unexpected host message");

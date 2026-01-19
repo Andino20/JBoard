@@ -2,6 +2,7 @@ package plus.jboard.net.session.protocol;
 
 import lombok.extern.slf4j.Slf4j;
 import plus.jboard.net.NetworkConnection;
+import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.HostSession;
 
@@ -58,8 +59,8 @@ public class HostHandshakeProtocol implements MessageHandler<HandshakeMessage> {
     }
 
     @Override
-    public void handle(HandshakeMessage msg) {
-        if (msg.getChannel() != connection)
+    public void handle(NetworkEnvelope<HandshakeMessage> msg) {
+        if (msg.channel() != connection)
             return;
 
         log.warn("Unexpected client handshake message received {}", msg);

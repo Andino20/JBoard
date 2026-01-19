@@ -3,6 +3,7 @@ package plus.jboard.net.handler;
 import lombok.extern.slf4j.Slf4j;
 import plus.jboard.core.Updatable;
 import plus.jboard.net.NetworkMessage;
+import plus.jboard.net.NetworkEnvelope;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,13 +32,13 @@ public class MessageDispatcher implements Updatable {
         pendingUnregisters.add(handler);
     }
 
-    public void dispatch(NetworkMessage msg) {
+    public void dispatch(NetworkEnvelope<NetworkMessage> envelope) {
         handlers.stream()
-                .filter(x -> canDispatchTo(x, msg))
+                .filter(x -> canDispatchTo(x, envelope.message()))
                 .forEach(x -> {
                     try {
                         @SuppressWarnings("unchecked") MessageHandler<NetworkMessage> handler = (MessageHandler<NetworkMessage>) x;
-                        handler.handle(msg);
+                        handler.handle(envelope);
                     } catch (ClassCastException e) {
                         log.error("An unexpected error occurred when dispatch a network message", e);
                     }

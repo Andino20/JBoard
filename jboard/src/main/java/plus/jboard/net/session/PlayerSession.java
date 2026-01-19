@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import plus.jboard.core.GameApplication;
 import plus.jboard.net.NetworkConnection;
+import plus.jboard.net.NetworkMessage;
 import plus.jboard.net.async.AsyncSocketConnection;
 import plus.jboard.net.handler.MessageCollector;
 import plus.jboard.net.handler.MessageDispatcher;
@@ -16,7 +17,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @Slf4j
-public class PlayerSession {
+public class PlayerSession implements Session {
 
     private final PlayerConfig config;
     private NetworkConnection connection;
@@ -60,4 +61,13 @@ public class PlayerSession {
         dispatcher.register(protocol);
     }
 
+    @Override
+    public void broadcast(NetworkMessage message) {
+        connection.send(message);
+    }
+
+    @Override
+    public void unicast(UUID target, NetworkMessage message) {
+        connection.send(message);
+    }
 }

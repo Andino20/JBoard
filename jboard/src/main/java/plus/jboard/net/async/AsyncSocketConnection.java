@@ -2,6 +2,7 @@ package plus.jboard.net.async;
 
 import lombok.extern.slf4j.Slf4j;
 import plus.jboard.net.NetworkConnection;
+import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.NetworkMessage;
 import plus.jboard.net.handler.MessageHandler;
 
@@ -61,7 +62,7 @@ public class AsyncSocketConnection implements NetworkConnection {
             try {
                 Object o = ois.readObject();
                 if (o instanceof NetworkMessage msg) {
-                    messageHandler.handle(msg);
+                    messageHandler.handle(new NetworkEnvelope<>(this, msg));
                 }
             } catch (ClassNotFoundException e) {
                 log.error("Unknown object type received", e);
