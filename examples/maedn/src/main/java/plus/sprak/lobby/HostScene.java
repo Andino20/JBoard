@@ -60,7 +60,7 @@ public class HostScene extends Scene {
         startButton.setEnabled(false);
         startButton.addActionListener(e -> {
             try {
-                GameApplication.getInstance().switchScenes(new MaednScene(session));
+                GameApplication.getInstance().switchScenes(new MaednScene(session, true));
             } catch (IOException ex) {
                 throw new RuntimeException("");
             }

@@ -7,6 +7,7 @@ import plus.jboard.net.session.Session;
 import plus.sprak.app.messages.GameMessage;
 import plus.sprak.app.messages.GameStateMessage;
 import plus.sprak.app.messages.MoveMessage;
+import plus.sprak.app.messages.MoveRequest;
 
 import java.io.IOException;
 import java.util.*;
@@ -38,7 +39,7 @@ public class Board implements MessageHandler<GameMessage> {
 
             for (int i = 0; i < homeFigures.length; i++) {
                 Figure f = new Figure(c);
-                move(f, -1);
+                move(f, -100); //for initialisation
 
                 f.setMoveListener(this::triggerMove);
                 figures.add(f);
@@ -48,12 +49,15 @@ public class Board implements MessageHandler<GameMessage> {
         // Register this class as a message handler with the dispatcher
         // You can create as many message handler of different types as you want
         // Just remember to register them, or otherwise they cannot receive messages
-        GameApplication.getInstance().getMessageDispatcher().register(this);
+        GameApplication.getInstance().getMessageDispatcher().lateRegister(this);
     }
 
     public void triggerMove(Figure f) {
         if(!HOST){
-            //TODO message(f);
+            MoveRequest msg = new MoveRequest();
+            msg.setFromPosition(f.getFieldPosition());
+            msg.setColor(f.getColor());
+            session.broadcast(msg);
             return;
         }
         if(d6.isUsed()){
@@ -101,12 +105,18 @@ public class Board implements MessageHandler<GameMessage> {
     }
 
     public void move(Figure f, int newPosition) {
+        int oldPosition = f.getFieldPosition();
+        int calcNewPosition = newPosition;
         if (newPosition < 0) { // move to home
             Figure[] home = homes.get(f.getColor());
-            findFreeHomeSpot(f.getColor()).ifPresent(i -> {
+            OptionalInt I = findFreeHomeSpot(f.getColor());
+            int i = 0;
+            if (I.isPresent()) {
+                i = I.getAsInt();
                 home[i] = f;
                 f.setPosition(Constants.homeToPixel.get(f.getColor()).get(i));
-            });
+                calcNewPosition = i - 10; //to encode the different places in home
+            }
         } else if (newPosition > 99){ // move in goal
             Figure[] goal = goals.get(f.getColor());
             int i = newPosition % 100;
@@ -124,7 +134,7 @@ public class Board implements MessageHandler<GameMessage> {
         // Clean up behind us
         if (f.getFieldPosition() >= 0 && f.getFieldPosition() < 100) {
             this.fields[f.getFieldPosition()] = null;
-        } else if (f.getFieldPosition() == -1) {
+        } else if (f.getFieldPosition() < 0) {
             Figure[] home = this.homes.get(f.getColor());
             for (int i = 0; i < home.length; i++) {
                 if (home[i] == f) {
@@ -145,14 +155,13 @@ public class Board implements MessageHandler<GameMessage> {
             }
         }
 
-        f.setFieldPosition(newPosition);
-        if(HOST){
+        f.setFieldPosition(calcNewPosition);
+        if(HOST && newPosition != -100){
             //TODO broadcast(move(Figure f, int newPosition))
-
-            // Something like this, just an example.
             MoveMessage msg = new MoveMessage();
-            msg.setFromPosition(10);
-            msg.setToPosition(16);
+            msg.setFromPosition(oldPosition);
+            msg.setToPosition(newPosition);
+            msg.setColor(f.getColor());
             session.broadcast(msg);
         }
     }
@@ -191,11 +200,38 @@ public class Board implements MessageHandler<GameMessage> {
     // to the sender
     @Override
     public void handle(NetworkEnvelope<GameMessage> envelope) {
-        if (envelope.message() instanceof MoveMessage message) {
+        if (envelope.message() instanceof MoveRequest message) {
             // handle move message (depends on if we are host or not
-            // send reply: envelope.channel().send(/* something something */);
-        } else if (envelope.message() instanceof GameStateMessage message) {
-            // handle game message (if you need it)
+            if(HOST){
+                Figure f = null;
+                if(message.getFromPosition() < 0){
+                    f = homes.get(message.getColor())[10+message.getFromPosition()];
+                }
+                else if(message.getFromPosition() > 99){
+                    f = goals.get(message.getColor())[message.getFromPosition()-100];
+                }
+                else{
+                    f = fields[message.getFromPosition()];
+                }
+
+                triggerMove(f);
+            }
+        } else if (envelope.message() instanceof MoveMessage message) {
+            if(!HOST){
+                Figure f = null;
+                if(message.getFromPosition() < 0){
+                    f = homes.get(message.getColor())[10+message.getFromPosition()];
+                }
+                else if(message.getFromPosition() > 99){
+                    f = goals.get(message.getColor())[message.getFromPosition()-100];
+                }
+                else{
+                    f = fields[message.getFromPosition()];
+                }
+
+                move(f, message.getToPosition());
+                d6.use();
+            }
         }
     }
 

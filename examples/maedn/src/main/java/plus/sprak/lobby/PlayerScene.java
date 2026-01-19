@@ -16,13 +16,11 @@ import java.io.IOException;
 
 public class PlayerScene extends Scene implements MessageHandler<GameStartMessage> {
 
-    private final Scene nextScene;
     private final PlayerSession session;
 
     private JLabel centerText;
 
-    public PlayerScene(PlayerSession session, Scene nextScene) {
-        this.nextScene = nextScene;
+    public PlayerScene(PlayerSession session) {
         this.session = session;
         GameApplication.getInstance().getMessageDispatcher().register(this);
 
@@ -65,7 +63,7 @@ public class PlayerScene extends Scene implements MessageHandler<GameStartMessag
     public void handle(NetworkEnvelope<GameStartMessage> messageContext) {
         GameApplication app = GameApplication.getInstance();
         try {
-            app.switchScenes(new MaednScene(session));
+            app.switchScenes(new MaednScene(session, false));
             app.getMessageDispatcher().lateUnregister(this);
         } catch (IOException e) {
             System.out.println("Failed to switch to MaednScene");

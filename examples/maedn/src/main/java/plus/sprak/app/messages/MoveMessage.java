@@ -1,5 +1,7 @@
 package plus.sprak.app.messages;
 
+import plus.sprak.app.PieceColor;
+
 /**
  * Represents a move request of a piece from one position on the field to another.
  * E.g. Piece at position 30 -> 36
@@ -13,6 +15,7 @@ public class MoveMessage extends GameMessage {
     // otherwise we cannot parse message of this type
     private int fromPosition;
     private int toPosition;
+    private PieceColor color;
 
     public int getToPosition() {
         return toPosition;
@@ -28,5 +31,13 @@ public class MoveMessage extends GameMessage {
 
     public void setFromPosition(int fromPosition) {
         this.fromPosition = fromPosition;
+    }
+
+    public PieceColor getColor() {
+        return color;
+    }
+
+    public void setColor(PieceColor color) {
+        this.color = color;
     }
 }
