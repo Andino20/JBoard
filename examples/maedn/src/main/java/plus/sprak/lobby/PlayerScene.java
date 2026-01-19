@@ -1,24 +1,30 @@
-package plus.sprak.scenes;
+package plus.sprak.lobby;
 
 import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
 import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.PlayerSession;
-import plus.sprak.messages.GameStartMessage;
+import plus.jboard.net.session.Session;
+import plus.sprak.app.MaednScene;
+import plus.sprak.lobby.messages.GameStartMessage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
 
 public class PlayerScene extends Scene implements MessageHandler<GameStartMessage> {
 
     private final Scene nextScene;
+    private final PlayerSession session;
 
     private JLabel centerText;
 
     public PlayerScene(PlayerSession session, Scene nextScene) {
         this.nextScene = nextScene;
+        this.session = session;
+        GameApplication.getInstance().getMessageDispatcher().register(this);
 
         init();
         session.onJoinSuccess(id -> SwingUtilities.invokeLater(() -> centerText.setText(String.format("You are %s!", id))));
@@ -57,7 +63,13 @@ public class PlayerScene extends Scene implements MessageHandler<GameStartMessag
 
     @Override
     public void handle(NetworkEnvelope<GameStartMessage> messageContext) {
-        GameApplication.getInstance().switchScenes(nextScene);
+        GameApplication app = GameApplication.getInstance();
+        try {
+            app.switchScenes(new MaednScene(session));
+            app.getMessageDispatcher().lateUnregister(this);
+        } catch (IOException e) {
+            System.out.println("Failed to switch to MaednScene");
+        }
     }
 
 }

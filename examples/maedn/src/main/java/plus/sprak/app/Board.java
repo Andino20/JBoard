@@ -1,9 +1,17 @@
 package plus.sprak.app;
 
+import plus.jboard.core.GameApplication;
+import plus.jboard.net.NetworkEnvelope;
+import plus.jboard.net.handler.MessageHandler;
+import plus.jboard.net.session.Session;
+import plus.sprak.app.messages.GameMessage;
+import plus.sprak.app.messages.GameStateMessage;
+import plus.sprak.app.messages.MoveMessage;
+
 import java.io.IOException;
 import java.util.*;
 
-public class Board {
+public class Board implements MessageHandler<GameMessage> {
 
     private static final int NUM_FIELDS = 40;
     private final boolean HOST;
@@ -15,9 +23,15 @@ public class Board {
     private final List<Figure> figures = new ArrayList<>();
     private final Die d6;
 
-    public Board(Die d6, boolean host) throws IOException {
+    // Session object with broadcast or unicast methods
+    // You can also make this a PlayerSession or HostSession object if you want to be specific but is probably not
+    // neccessary.
+    private final Session session;
+
+    public Board(Die d6, boolean host, Session session) throws IOException {
         this.d6 = d6;
         this.HOST = host;
+        this.session = session;
         for (PieceColor c : PieceColor.values()) {
             goals.putIfAbsent(c, new Figure[4]);
             Figure[] homeFigures = homes.computeIfAbsent(c, k -> new Figure[4]);
@@ -30,6 +44,11 @@ public class Board {
                 figures.add(f);
             }
         }
+
+        // Register this class as a message handler with the dispatcher
+        // You can create as many message handler of different types as you want
+        // Just remember to register them, or otherwise they cannot receive messages
+        GameApplication.getInstance().getMessageDispatcher().register(this);
     }
 
     public void triggerMove(Figure f) {
@@ -129,6 +148,12 @@ public class Board {
         f.setFieldPosition(newPosition);
         if(HOST){
             //TODO broadcast(move(Figure f, int newPosition))
+
+            // Something like this, just an example.
+            MoveMessage msg = new MoveMessage();
+            msg.setFromPosition(10);
+            msg.setToPosition(16);
+            session.broadcast(msg);
         }
     }
 
@@ -154,4 +179,24 @@ public class Board {
             case GREEN -> 30;
         };
     }
+
+    // We tell the message dispatcher what type of message we are interested in
+    @Override
+    public Class<GameMessage> getAssociatedMessageType() {
+        return GameMessage.class;
+    }
+
+    // We receive message of our type of interest
+    // Envelopes also contain the connection from where the message came, so you could theoretically reply
+    // to the sender
+    @Override
+    public void handle(NetworkEnvelope<GameMessage> envelope) {
+        if (envelope.message() instanceof MoveMessage message) {
+            // handle move message (depends on if we are host or not
+            // send reply: envelope.channel().send(/* something something */);
+        } else if (envelope.message() instanceof GameStateMessage message) {
+            // handle game message (if you need it)
+        }
+    }
+
 }

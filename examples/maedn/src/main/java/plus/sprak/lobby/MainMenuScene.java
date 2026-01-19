@@ -1,4 +1,4 @@
-package plus.sprak.scenes;
+package plus.sprak.lobby;
 
 import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
@@ -14,12 +14,9 @@ import java.awt.*;
 
 public class MainMenuScene extends Scene {
 
-    private final Scene gameScene;
     private final JPanel root;
 
     public MainMenuScene(Scene gameScene) {
-        this.gameScene = gameScene;
-
         root = new JPanel(new GridBagLayout());
         root.setBorder(new EmptyBorder(20, 20, 20, 20));
 
@@ -29,7 +26,7 @@ public class MainMenuScene extends Scene {
         gbc.anchor = GridBagConstraints.CENTER;
 
         // Title
-        JLabel title = new JLabel("Networking Demo", SwingConstants.CENTER);
+        JLabel title = new JLabel("Mensch ärgere dich nicht!", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         gbc.gridy = 0;
@@ -73,15 +70,18 @@ public class MainMenuScene extends Scene {
 
         if (result == JOptionPane.OK_OPTION) {
             String portText = portField.getText();
+
+            GameApplication app = GameApplication.getInstance();
+
             HostSession session = new HostSession(HostConfig.builder()
-                    .maxClients(4)
+                    .maxClients(1)
                     .port(Integer.parseInt(portText))
                     .build());
-            session.onPlayerJoin(id -> System.out.printf("Player %s joined!%n", id));
-            GameApplication.getInstance().addUpdatable(session);
+            app.addUpdatable(session);
             session.start();
-            HostScene lobby = new HostScene(session, gameScene);
-            GameApplication.getInstance().switchScenes(lobby);
+
+            HostScene lobby = new HostScene(session);
+            app.switchScenes(lobby);
         }
     }
 
@@ -109,7 +109,7 @@ public class MainMenuScene extends Scene {
                     .targetHost(ip)
                     .targetPort(Integer.parseInt(portText))
                     .build());
-            PlayerScene lobby = new PlayerScene(session, gameScene);
+            PlayerScene lobby = new PlayerScene(session);
             GameApplication.getInstance().switchScenes(lobby);
         }
     }

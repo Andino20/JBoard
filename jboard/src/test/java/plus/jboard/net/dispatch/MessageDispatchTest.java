@@ -3,6 +3,7 @@ package plus.jboard.net.dispatch;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import plus.jboard.net.NetworkEnvelope;
+import plus.jboard.net.NetworkMessage;
 import plus.jboard.net.handler.MessageDispatcher;
 import plus.jboard.net.handler.MessageHandler;
 
@@ -11,60 +12,47 @@ import java.util.function.Consumer;
 
 class MessageDispatchTest {
 
-    static class MockGameMessageHandler implements MessageHandler<GameMessage> {
+    static class MockMessageHandlerBase<T extends NetworkMessage> implements MessageHandler<T> {
 
-        private final Consumer<GameMessage> callback;
+        private final Class<T> clazz;
+        private final Consumer<NetworkEnvelope<T>> callback;
 
-        public MockGameMessageHandler(Consumer<GameMessage> callback) {
+        public MockMessageHandlerBase(Class<T> clazz, Consumer<NetworkEnvelope<T>> callback) {
+            this.clazz = clazz;
             this.callback = callback;
         }
 
         @Override
-        public Class<GameMessage> getAssociatedMessageType() {
-            return GameMessage.class;
+        public Class<T> getAssociatedMessageType() {
+            return clazz;
         }
 
         @Override
-        public void handle(NetworkEnvelope<GameMessage> envelope) {
-            callback.accept(envelope.message());
+        public void handle(NetworkEnvelope<T> envelope) {
+            this.callback.accept(envelope);
         }
-
-    }
-
-    static class MockSessionMessageHandler implements MessageHandler<SessionMessage> {
-
-        private final Consumer<SessionMessage> callback;
-
-        public MockSessionMessageHandler(Consumer<SessionMessage> callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        public Class<SessionMessage> getAssociatedMessageType() {
-            return SessionMessage.class;
-        }
-
-        @Override
-        public void handle(NetworkEnvelope<SessionMessage> envelope) {
-            this.callback.accept(envelope.message());
-        }
-
     }
 
     @Test
     void dispatchMessageTest() {
         MessageDispatcher dispatcher = new MessageDispatcher();
 
-        AtomicBoolean success = new AtomicBoolean(false);
-        MockGameMessageHandler gameHandler = new MockGameMessageHandler(msg -> Assertions.fail("Dispatched to wrong handler"));
-        MockSessionMessageHandler sessionHandler = new MockSessionMessageHandler(msg -> {
-            Assertions.assertEquals(10, msg.getId());
-            success.set(true);
-        });
-        dispatcher.register(gameHandler);
-        dispatcher.register(sessionHandler);
 
-        dispatcher.dispatch(new NetworkEnvelope<>(null, new SessionMessage(10)));
+        MockMessageHandlerBase<GameMessage> gameMessageHandler =
+                new MockMessageHandlerBase<>(GameMessage.class, envelope -> {
+                    Assertions.fail("Dispatched to wrong handler");
+                });
+
+        AtomicBoolean success = new AtomicBoolean(false);
+        MockMessageHandlerBase<SessionMessage> sessionMessageHandler =
+                new MockMessageHandlerBase<>(SessionMessage.class, envelope -> {
+                    success.set(true);
+                });
+
+        dispatcher.register(gameMessageHandler);
+        dispatcher.register(sessionMessageHandler);
+
+        dispatcher.dispatch(new NetworkEnvelope<>(null, new SessionMessage()));
         Assertions.assertTrue(success.get());
     }
 
