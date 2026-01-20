@@ -6,9 +6,15 @@ plugins {
     id 'application'
 }
 
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
 dependencies {
     implementation project(':jboard')
 }
+
 
 application {
     // Define the main class for the application.

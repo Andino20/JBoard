@@ -6,6 +6,7 @@ import plus.jboard.math.Vector2D;
 import plus.jboard.render.RenderObject;
 import plus.jboard.render.TextRenderObject;
 
+import java.awt.*;
 import java.util.Random;
 
 public class Die extends GameObject {
@@ -43,7 +44,7 @@ public class Die extends GameObject {
 
     @Override
     public RenderObject toRenderObject() {
-        return new TextRenderObject(this.getPosition().sub(Vector2D.of(0, -32)), "" + lastRoll);
+        return new TextRenderObject(this.getPosition().sub(Vector2D.of(0, -32)), "" + lastRoll, Color.BLACK);
     }
 
 }

@@ -5,7 +5,6 @@ import plus.jboard.core.Scene;
 import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.PlayerSession;
-import plus.jboard.net.session.Session;
 import plus.sprak.app.MaednScene;
 import plus.sprak.lobby.messages.GameStartMessage;
 

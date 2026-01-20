@@ -20,14 +20,13 @@ public class Piece extends GameObject {
             case BLACK -> 24;
         };
 
-        String filename = "";
-        switch (color) {
-            case WHITE -> filename = "piece_white.png";//TODO: ergänzen
-            case BLACK -> filename = "piece_black.png";
-
-        }
+        String filename = switch (color) {
+            case WHITE -> "piece_white.png";
+            case BLACK -> "piece_black.png";
+        };
         this.sprite = new Sprite(Path.of("src", "main", "resources", filename).toUri());
     }
+
     @Override
     public void onMouseClick(Vector2D position) {
         if (moveListener != null) {
