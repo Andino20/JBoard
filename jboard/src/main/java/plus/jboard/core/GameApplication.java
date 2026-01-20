@@ -99,7 +99,6 @@ public final class GameApplication implements Runnable {
         this.currentScene = newScene;
 
         SwingUtilities.invokeLater(() -> {
-<<<<<<< HEAD
             log.info("Switching scenes from {} to {}",
                     oldScene.getClass().getSimpleName(),
                     newScene.getClass().getSimpleName());
@@ -112,13 +111,6 @@ public final class GameApplication implements Runnable {
 
             layeredPane.revalidate();
             layeredPane.repaint();
-=======
-            JFrame window = initFrame(title, width, height);
-            renderer = new RenderContext();
-            renderer.addMouseListener((MouseClickListener) e -> notifyMouseClick(Vector2D.of(e.getX(), e.getY())));
-            renderer.addMouseListener((MouseClickListener) e -> System.out.printf("Clicked at: (%d, %d)%n", e.getX(), e.getY()));
-            window.add(renderer);
->>>>>>> 91cf12d (Draft of basic backgammon structure)
         });
     }
 
