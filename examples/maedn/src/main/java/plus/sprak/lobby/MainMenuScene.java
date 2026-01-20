@@ -1,4 +1,4 @@
-package plus.sprak.scenes;
+package plus.sprak.lobby;
 
 import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
@@ -6,20 +6,19 @@ import plus.jboard.net.session.HostConfig;
 import plus.jboard.net.session.HostSession;
 import plus.jboard.net.session.PlayerConfig;
 import plus.jboard.net.session.PlayerSession;
+import plus.sprak.app.MaednScene;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
 
 
 public class MainMenuScene extends Scene {
 
-    private final Scene gameScene;
     private final JPanel root;
 
-    public MainMenuScene(Scene gameScene) {
-        this.gameScene = gameScene;
-
+    public MainMenuScene() {
         root = new JPanel(new GridBagLayout());
         root.setBorder(new EmptyBorder(20, 20, 20, 20));
 
@@ -29,7 +28,7 @@ public class MainMenuScene extends Scene {
         gbc.anchor = GridBagConstraints.CENTER;
 
         // Title
-        JLabel title = new JLabel("Networking Demo", SwingConstants.CENTER);
+        JLabel title = new JLabel("Mensch ärgere dich nicht!", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         gbc.gridy = 0;
@@ -44,7 +43,13 @@ public class MainMenuScene extends Scene {
         JButton joinButton = new JButton("Join Session");
 
         hostButton.addActionListener(e -> showHostDialog());
-        joinButton.addActionListener(e -> showJoinDialog());
+        joinButton.addActionListener(e -> {
+            try {
+                showJoinDialog();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         buttonPanel.add(hostButton);
         buttonPanel.add(joinButton);
@@ -73,19 +78,23 @@ public class MainMenuScene extends Scene {
 
         if (result == JOptionPane.OK_OPTION) {
             String portText = portField.getText();
+
+            GameApplication app = GameApplication.getInstance();
+
+            // TODO: Here you can change how many clients can join
             HostSession session = new HostSession(HostConfig.builder()
-                    .maxClients(4)
+                    .maxClients(2)
                     .port(Integer.parseInt(portText))
                     .build());
-            session.onPlayerJoin(id -> System.out.printf("Player %s joined!%n", id));
-            GameApplication.getInstance().addUpdatable(session);
+            app.addUpdatable(session);
             session.start();
-            HostScene lobby = new HostScene(session, gameScene);
-            GameApplication.getInstance().switchScenes(lobby);
+
+            HostScene lobby = new HostScene(session);
+            app.switchScenes(lobby);
         }
     }
 
-    private void showJoinDialog() {
+    private void showJoinDialog() throws IOException {
         JTextField ipField = new JTextField("127.0.0.1");
         JTextField portField = new JTextField();
 
@@ -109,7 +118,7 @@ public class MainMenuScene extends Scene {
                     .targetHost(ip)
                     .targetPort(Integer.parseInt(portText))
                     .build());
-            PlayerScene lobby = new PlayerScene(session, gameScene);
+            PlayerScene lobby = new PlayerScene(session);
             GameApplication.getInstance().switchScenes(lobby);
         }
     }

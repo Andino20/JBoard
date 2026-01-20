@@ -1,4 +1,4 @@
-package plus.sprak.messages;
+package plus.sprak.lobby.messages;
 
 import plus.jboard.net.NetworkMessage;
 

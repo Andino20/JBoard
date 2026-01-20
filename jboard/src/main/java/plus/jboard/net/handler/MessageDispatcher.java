@@ -15,6 +15,7 @@ public class MessageDispatcher implements Updatable {
 
     private final List<MessageHandler<?>> handlers = new LinkedList<>();
     private final Queue<MessageHandler<?>> pendingUnregisters = new ConcurrentLinkedQueue<>();
+    private final Queue<MessageHandler<?>> pendingRegisters = new ConcurrentLinkedQueue<>();
 
     public void register(MessageHandler<?> handler) {
         if (handler != null && !handlers.contains(handler)) {
@@ -30,6 +31,10 @@ public class MessageDispatcher implements Updatable {
 
     public void lateUnregister(MessageHandler<?> handler) {
         pendingUnregisters.add(handler);
+    }
+
+    public void lateRegister(MessageHandler<?> handler) {
+        pendingRegisters.add(handler);
     }
 
     public void dispatch(NetworkEnvelope<NetworkMessage> envelope) {
@@ -54,5 +59,8 @@ public class MessageDispatcher implements Updatable {
         MessageHandler<?> handler;
         while ((handler = pendingUnregisters.poll()) != null)
             unregister(handler);
+
+        while ((handler = pendingRegisters.poll()) != null)
+            register(handler);
     }
 }

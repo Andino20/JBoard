@@ -1,27 +1,27 @@
-package plus.sprak.scenes;
+package plus.sprak.lobby;
 
 import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
 import plus.jboard.net.session.HostSession;
-import plus.sprak.messages.GameStartMessage;
+import plus.sprak.app.MaednScene;
+import plus.sprak.lobby.messages.GameStartMessage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
 import java.util.UUID;
 
 public class HostScene extends Scene {
 
     private final HostSession session;
-    private final Scene nextScene;
 
     private JButton startButton;
 
     private DefaultListModel<String> playerListModel;
 
-    public HostScene(HostSession session, Scene nextScene) {
+    public HostScene(HostSession session) {
         this.session = session;
-        this.nextScene = nextScene;
 
         session.onPlayerJoin(this::onPlayerJoin);
         init();
@@ -58,11 +58,20 @@ public class HostScene extends Scene {
 
         startButton = new JButton("Start");
         startButton.setEnabled(false);
-        startButton.addActionListener(e -> GameApplication.getInstance().switchScenes(nextScene));
+        startButton.addActionListener(e -> {
+            try {
+                GameApplication.getInstance().switchScenes(new MaednScene(session, true));
+            } catch (IOException ex) {
+                throw new RuntimeException("");
+            }
+            session.broadcast(new GameStartMessage());
+        });
 
         gbc.gridy = 2;
         gbc.insets = new Insets(0, 0, 15, 0);
         root.add(startButton, gbc);
+
+        this.addPlayer("You");
 
         setUI(root);
     }
@@ -73,12 +82,10 @@ public class HostScene extends Scene {
         }
     }
 
-
     private void onPlayerJoin(UUID id) {
         this.addPlayer(id.toString());
         if (session.isFull()) {
             this.startButton.setEnabled(true);
-            this.session.broadcast(new GameStartMessage());
         }
     }
 
