@@ -15,7 +15,10 @@ public class Piece extends GameObject {
 
     public Piece(PieceColor color) throws IOException {
         this.color = color;
-        this.fieldPosition = 0;
+        this.fieldPosition = switch (color) {
+            case WHITE -> -1;
+            case BLACK -> 24;
+        };
 
         String filename = "";
         switch (color) {

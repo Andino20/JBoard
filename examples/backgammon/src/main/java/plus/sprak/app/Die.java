@@ -11,7 +11,7 @@ import java.util.Random;
 public class Die extends GameObject {
 
     private Random rng;
-    private int lastRoll = 6;
+    private int lastRoll = 3;
 
     public Die() {
         this.setPosition(Vector2D.of(150, 20));
