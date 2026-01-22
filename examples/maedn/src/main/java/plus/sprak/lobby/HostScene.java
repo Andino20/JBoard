@@ -84,9 +84,7 @@ public class HostScene extends Scene {
 
     private void onPlayerJoin(UUID id) {
         this.addPlayer(id.toString());
-        if (session.isFull()) {
-            this.startButton.setEnabled(true);
-        }
+        this.startButton.setEnabled(true);
     }
 
 }

@@ -83,7 +83,7 @@ public class MainMenuScene extends Scene {
 
             // TODO: Here you can change how many clients can join
             HostSession session = new HostSession(HostConfig.builder()
-                    .maxClients(2)
+                    .maxClients(3)
                     .port(Integer.parseInt(portText))
                     .build());
             app.addUpdatable(session);

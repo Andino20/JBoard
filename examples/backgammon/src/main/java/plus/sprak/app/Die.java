@@ -11,22 +11,21 @@ import java.util.Random;
 
 public class Die extends GameObject {
 
-    private Random rng;
-    private int lastRoll = 3;
+    private final Random rng;
+    private final Runnable clickCallback;
 
-    public Die() {
-        this.setPosition(Vector2D.of(150, 20));
-        rng = new Random();
-    }
+    private int lastRoll;
+    private Color color = Color.BLACK;
 
-    public Die(Random rng) {
-        this();
-        this.rng = rng;
+    public Die(Vector2D position, Runnable clickCallback) {
+        this.clickCallback = clickCallback;
+        this.rng = new Random();
+        this.setPosition(position);
     }
 
     @Override
     public void onMouseClick(Vector2D position) {
-        roll();
+        clickCallback.run();
     }
 
     public void roll() {
@@ -37,6 +36,10 @@ public class Die extends GameObject {
         return lastRoll;
     }
 
+    public void setActive(boolean active) {
+        this.color = active ? Color.GREEN : Color.BLACK;
+    }
+
     @Override
     public Rectangle getBoundingBox() {
         return new Rectangle(this.getPosition(), Vector2D.of(32, 32));
@@ -44,7 +47,8 @@ public class Die extends GameObject {
 
     @Override
     public RenderObject toRenderObject() {
-        return new TextRenderObject(this.getPosition().sub(Vector2D.of(0, -32)), "" + lastRoll, Color.BLACK);
+        String text = "" + lastRoll;
+        return new TextRenderObject(this.getPosition().sub(Vector2D.of(0, -32)), text, color);
     }
 
 }

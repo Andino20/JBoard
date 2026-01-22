@@ -3,18 +3,25 @@ package plus.sprak.app;
 import plus.jboard.math.Vector2D;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
 
 public class Board {
+    //TODO: Würfel (in dem Fall DieSelector) so animieren dass man immer sieht das gewürfelt wurde (wie bei Maedn)
+    //TODO: Backgammon über das Netzwerk spielbar machen
+    //TODO: Eventuell: Column oder so ähnlich als Klasse rausziehen
+    //TODO: Super nice aber nicht notwendig: Rückgängigkeitsbutton bei beiden spielen der move zurück nimmt
 
     private static final int NUM_FIELDS = 24;
     private static final int BLACK_GOAL = -2;
     private static final int WHITE_GOAL = 25;
 
-    private final Die d6;
-
-    //todo: kann fields array 2 werte halten? also ein piece und wieviele pices oder halt meherer pieces?
     private final Stack<Piece>[] fields = new Stack[NUM_FIELDS];
+    private final List<Piece> pieces = new ArrayList<>();
+
+    private final DieSelector dieSelector;
 
     private final Stack<Piece> blackHome = new Stack<>();
     private final Stack<Piece> whiteHome = new Stack<>();
@@ -22,16 +29,16 @@ public class Board {
     private final Stack<Piece> blackGoal = new Stack<>();
     private final Stack<Piece> whiteGoal = new Stack<>();
 
-    private final List<Piece> pieces = new ArrayList<>();
 
-    public Board(Die d6) throws IOException {
-        this.d6 = d6;
-        initTestBoard();
-        //initBoard();
+
+    public Board(DieSelector dieSelector) throws IOException {
+        this.dieSelector = dieSelector;
+        initBoard();
+        //initTestBoard();
     }
 
     private void initBoard() throws IOException {
-        Arrays.setAll(fields, _ -> new Stack<>());
+        Arrays.setAll(fields, i -> new Stack<>());
         initStartPosition(PieceColor.WHITE, 0, 2);
         initStartPosition(PieceColor.WHITE, 11, 5);
         initStartPosition(PieceColor.WHITE, 18, 5);
@@ -42,15 +49,15 @@ public class Board {
         initStartPosition(PieceColor.BLACK, 23, 2);
     }
 
-    private void initTestBoard() throws IOException {
-        Arrays.setAll(fields, _ -> new Stack<>());
-        initStartPosition(PieceColor.BLACK, 0, 5);
-        initStartPosition(PieceColor.BLACK, 10, 1);
-        initStartPosition(PieceColor.WHITE, 15, 1);
-        initStartPosition(PieceColor.WHITE, 20, 5);
-        initStartPosition(PieceColor.WHITE, 21, 5);
-        initStartPosition(PieceColor.WHITE, 22, 5);
-    }
+//    private void initTestBoard() throws IOException {
+//        Arrays.setAll(fields, i -> new Stack<>());
+//        initStartPosition(PieceColor.BLACK, 0, 5);
+//        initStartPosition(PieceColor.BLACK, 10, 1);
+//        initStartPosition(PieceColor.WHITE, 15, 1);
+//        initStartPosition(PieceColor.WHITE, 20, 5);
+//        initStartPosition(PieceColor.WHITE, 21, 5);
+//        initStartPosition(PieceColor.WHITE, 22, 5);
+//    }
 
     private void initStartPosition(PieceColor c, int column, int amount) throws IOException {
         for (int i = 0; i < amount; i++) {
@@ -62,11 +69,11 @@ public class Board {
     }
 
     public void triggerMove(Piece p) {
-        int dice = d6.getRoll();
+        int dice = this.dieSelector.getRoll();
         int change = 1; // Richtung ändert sich in Abhängigkeit von der Farbe
         if (p.getColor() == PieceColor.BLACK)
             change = -1;
-        int nextPos = (p.getFieldPosition() + (dice * change)); //TODO: % NUM_FIELDS Odulu bei Minus überprüfen
+        int nextPos = (p.getFieldPosition() + (dice * change));
 
         if (wouldMoveToGoal(p, dice)) {
             if (canMoveToGoal(p.getColor())) {
@@ -100,10 +107,10 @@ public class Board {
         Stack<Piece> old = getColumnOfPiece(p);
         Stack<Piece> dest;
         if (p.getColor() == PieceColor.WHITE) {
-            p.setFieldPosition(-2);
+            p.setFieldPosition(25);
             dest = whiteGoal;
         } else {
-            p.setFieldPosition(25);
+            p.setFieldPosition(-2);
             dest = blackGoal;
         }
         dest.push(p);
@@ -121,7 +128,7 @@ public class Board {
             }
         } else {
             for (int i = 0; i < NUM_FIELDS; i++) {
-                if (fields[i] == destinedPosition) {//eventuell equals statt ==
+                if (fields[i] == destinedPosition) {
                     p.setFieldPosition(i);
                     break;
                 }
@@ -131,7 +138,7 @@ public class Board {
         destinedPosition.push(p);
         if (!oldposition.isEmpty()) {
             oldposition.pop();
-        }//Todo: falls fehler,d aufpassen ob wir mehr als höchtes element bewegen
+        }
         updateScreenPosition(p);
     }
 
@@ -180,11 +187,10 @@ public class Board {
             default -> fields[p.getFieldPosition()];
         };
 
-        Vector2D columnBase = Constants.columnPositionToPixel.get(p.getFieldPosition());
+        Vector2D columnBase = Constants.columnPositionToPixel.get(p.getFieldPosition()).add(Vector2D.of(4, 0));
         int columnOffset = currentColumn.size();
-        //int offsetMod
         if (p.getFieldPosition() < 12) {
-            columnOffset -= 1; //Todo: position an seiten?
+            columnOffset -= 1;
         } else {
             columnOffset *= -1;
         }
