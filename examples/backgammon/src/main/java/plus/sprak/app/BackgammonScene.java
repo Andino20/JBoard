@@ -3,6 +3,7 @@ package plus.sprak.app;
 import plus.jboard.core.GameObject;
 import plus.jboard.core.Scene;
 import plus.jboard.math.Vector2D;
+import plus.jboard.net.session.Session;
 import plus.jboard.render.Sprite;
 
 import javax.imageio.ImageIO;
@@ -20,7 +21,7 @@ public class BackgammonScene extends Scene {
         }
     }
 
-    public BackgammonScene() throws IOException {
+    public BackgammonScene(Session session, boolean host) throws IOException {
         Background bg = new Background();
         DieSelector dieSelector = new DieSelector(Vector2D.of(335, 225));//TODO: Bitte lesen
                 //Wir haben jetzt 2 Dice, darum: DieSelector handelt die dice

@@ -1,6 +1,10 @@
 package plus.sprak.app;
 
+import plus.jboard.core.GameApplication;
 import plus.jboard.math.Vector2D;
+import plus.jboard.net.NetworkEnvelope;
+import plus.jboard.net.handler.MessageHandler;
+import plus.sprak.app.messages.GameMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
-public class Board {
+public class Board implements MessageHandler<GameMessage> {
     //TODO: Würfel (in dem Fall DieSelector) so animieren dass man immer sieht das gewürfelt wurde (wie bei Maedn)
     //TODO: Backgammon über das Netzwerk spielbar machen
     //TODO: Eventuell: Column oder so ähnlich als Klasse rausziehen
@@ -29,12 +33,10 @@ public class Board {
     private final Stack<Piece> blackGoal = new Stack<>();
     private final Stack<Piece> whiteGoal = new Stack<>();
 
-
-
     public Board(DieSelector dieSelector) throws IOException {
         this.dieSelector = dieSelector;
         initBoard();
-        //initTestBoard();
+        GameApplication.getInstance().getMessageDispatcher().lateRegister(this);
     }
 
     private void initBoard() throws IOException {
@@ -48,16 +50,6 @@ public class Board {
         initStartPosition(PieceColor.BLACK, 12, 5);
         initStartPosition(PieceColor.BLACK, 23, 2);
     }
-
-//    private void initTestBoard() throws IOException {
-//        Arrays.setAll(fields, i -> new Stack<>());
-//        initStartPosition(PieceColor.BLACK, 0, 5);
-//        initStartPosition(PieceColor.BLACK, 10, 1);
-//        initStartPosition(PieceColor.WHITE, 15, 1);
-//        initStartPosition(PieceColor.WHITE, 20, 5);
-//        initStartPosition(PieceColor.WHITE, 21, 5);
-//        initStartPosition(PieceColor.WHITE, 22, 5);
-//    }
 
     private void initStartPosition(PieceColor c, int column, int amount) throws IOException {
         for (int i = 0; i < amount; i++) {
@@ -199,6 +191,16 @@ public class Board {
 
     public List<Piece> getAllPieces() {
         return pieces;
+    }
+
+    @Override
+    public Class<GameMessage> getAssociatedMessageType() {
+        return GameMessage.class;
+    }
+
+    @Override
+    public void handle(NetworkEnvelope<GameMessage> envelope) {
+        // TODO: if (envelope.message() instanceof...
     }
 
 }
