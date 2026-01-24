@@ -1,5 +1,5 @@
 package plus.jboard.core;
 
 public interface Updatable {
-    void update();
+    void update(double deltaTime);
 }

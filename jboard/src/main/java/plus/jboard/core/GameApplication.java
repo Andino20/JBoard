@@ -81,7 +81,7 @@ public final class GameApplication implements Runnable {
 
             if (elapsed >= FRAME_NANOS) {
                 lastTime = now;
-                update();
+                update(elapsed / 1e6);
                 processNetworkMessages();
                 render();
             } else {
@@ -124,12 +124,16 @@ public final class GameApplication implements Runnable {
         }
     }
 
-    private void update() {
-        updatables.forEach(Updatable::update);
+    private void update(double deltaTime) {
+        updatables.forEach(u -> u.update(deltaTime));
     }
 
     public void addUpdatable(Updatable updatable) {
         updatables.add(updatable);
+    }
+
+    public void removeUpdatable(Updatable updatable) {
+        updatables.remove(updatable);
     }
 
     private void render() {

@@ -55,7 +55,7 @@ public class MessageDispatcher implements Updatable {
     }
 
     @Override
-    public void update() {
+    public void update(double deltaTime) {
         MessageHandler<?> handler;
         while ((handler = pendingUnregisters.poll()) != null)
             unregister(handler);

@@ -40,7 +40,7 @@ public class HostSession implements Session, MessageHandler<SessionMessage>, Upd
         log.info("Hosting on port {} for up to {} clients.", config.getPort(), config.getMaxClients());
     }
 
-    public void update() {
+    public void update(double deltaTime) {
         NetworkConnection connection;
         while ((connection = pendingClients.poll()) != null)
             handleClient(connection);

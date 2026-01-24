@@ -11,8 +11,10 @@ public class Animation<T> implements Updatable {
     private final double duration;
     private final Supplier<T> getter;
     private final Consumer<T> setter;
-    private final T target;
     private final Interpolator<T> interpolator;
+
+    private final T target;
+    private T from;
 
     private boolean active = false;
     private double time = 0.0f;
@@ -25,11 +27,12 @@ public class Animation<T> implements Updatable {
         this.interpolator = interpolator;
     }
 
+    @Override
     public void update(double deltaTime) {
         if (active) {
             time += deltaTime;
             double t = Math.min(1.0, time / duration);
-            setter.accept(interpolator.interpolate(getter.get(), target, t));
+            setter.accept(interpolator.interpolate(from, target, t));
             if (time >= duration) {
                 active = false;
                 GameApplication.getInstance().removeUpdatable(this);
@@ -39,6 +42,7 @@ public class Animation<T> implements Updatable {
 
     public void start() {
         this.active = true;
+        from = getter.get();
         GameApplication.getInstance().addUpdatable(this);
     }
 

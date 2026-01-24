@@ -1,11 +1,13 @@
 package plus.sprak.app;
 
 import plus.jboard.core.GameApplication;
+import plus.jboard.core.anim.Animation;
+import plus.jboard.core.anim.interpolators.LinearInterpolator;
+import plus.jboard.math.Vector2D;
 import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.Session;
 import plus.sprak.app.messages.GameMessage;
-import plus.sprak.app.messages.GameStateMessage;
 import plus.sprak.app.messages.MoveMessage;
 import plus.sprak.app.messages.MoveRequest;
 
@@ -128,7 +130,14 @@ public class Board implements MessageHandler<GameMessage> {
         }
         else { // move to field
             fields[newPosition] = f;
-            f.setPosition(Constants.fieldToPixel.get(newPosition));
+            Animation<Vector2D> movement = new Animation<>(
+                    f::getPosition,
+                    f::setPosition,
+                    Constants.fieldToPixel.get(newPosition),
+                    1000.0,
+                    LinearInterpolator.VECTOR2D_LINEAR);
+            movement.start();
+            //f.setPosition(Constants.fieldToPixel.get(newPosition));
         }
 
         // Clean up behind us
