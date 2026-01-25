@@ -23,9 +23,7 @@ public class BackgammonScene extends Scene {
 
     public BackgammonScene(Session session, boolean host) throws IOException {
         Background bg = new Background();
-        DieSelector dieSelector = new DieSelector(Vector2D.of(335, 225), host, session);//TODO: Bitte lesen
-                //Wir haben jetzt 2 Dice, darum: DieSelector handelt die dice
-                //"Die" ist aufgeteilt in RollButton (würfelt) und DieSelector (wählt den Würfelwert zum Ziehen aus)
+        DieSelector dieSelector = new DieSelector(Vector2D.of(335, 225), host, session);
         RollButton rollButton = new RollButton(Vector2D.of(720, 215), dieSelector::roll);
         Board board = new Board(dieSelector, host, session);
         board.getAllPieces().forEach(p -> this.addGameObject(p, 1));

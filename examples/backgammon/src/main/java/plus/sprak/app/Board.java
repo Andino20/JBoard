@@ -14,10 +14,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class Board implements MessageHandler<GameMessage> {
-    //TODO: Würfel (in dem Fall DieSelector) so animieren dass man immer sieht das gewürfelt wurde (wie bei Maedn) //nicht unbedingt notwendig, da die Wslkeit, das gleiche zu bekommen "nur" 1/36 ist und außerdem von grün auf schwarz getoggelt wird
-    //TODO: Backgammon über das Netzwerk spielbar machen
-    //TODO: Eventuell: Column oder so ähnlich als Klasse rausziehen
-    //TODO: Super nice aber nicht notwendig: Rückgängigkeitsbutton bei beiden spielen der move zurück nimmt
 
     private static final int NUM_FIELDS = 24;
     private static final int BLACK_GOAL = -2;
@@ -69,7 +65,7 @@ public class Board implements MessageHandler<GameMessage> {
     }
 
     public void triggerMove(Piece clicked) {
-        if(!HOST){
+        if (!HOST) {
             MoveRequest msg = new MoveRequest();
             msg.setFromPosition(clicked.getFieldPosition());
             session.broadcast(msg);
@@ -77,7 +73,7 @@ public class Board implements MessageHandler<GameMessage> {
         }
         int dice = this.dieSelector.getRoll();
         Piece p = fields[clicked.getFieldPosition()].peek();
-        int change = 1; // Richtung ändert sich in Abhängigkeit von der Farbe
+        int change = 1;
         if (p.getColor() == PieceColor.BLACK)
             change = -1;
         int nextPos = (p.getFieldPosition() + (dice * change));
@@ -130,7 +126,7 @@ public class Board implements MessageHandler<GameMessage> {
         old.pop();
         updateScreenPosition(p);
 
-        if(HOST){
+        if (HOST) {
             MoveInGoalMessage msg = new MoveInGoalMessage();
             msg.setFromPosition(p.getFieldPosition());
             session.broadcast(msg);
@@ -141,13 +137,11 @@ public class Board implements MessageHandler<GameMessage> {
         int fromPosition = p.getFieldPosition();
         Stack<Piece> oldposition = getColumnOfPiece(p);
         Stack<Piece> destinedPosition = null;
-        if(destinedFieldNum == -10){
+        if (destinedFieldNum == -10) {
             destinedPosition = whiteHome;
-        }
-        else if (destinedFieldNum == -20){
+        } else if (destinedFieldNum == -20) {
             destinedPosition = blackHome;
-        }
-        else {
+        } else {
             destinedPosition = fields[destinedFieldNum];
         }
         if (destinedPosition == whiteHome || destinedPosition == blackHome) {
@@ -169,7 +163,7 @@ public class Board implements MessageHandler<GameMessage> {
             oldposition.pop();
         }
         updateScreenPosition(p);
-        if(HOST && !getInitialisation()){
+        if (HOST && !getInitialisation()) {
             MoveMessage msg = new MoveMessage();
             msg.setFromPosition(fromPosition);
             msg.setDestination(destinedFieldNum);
@@ -252,8 +246,7 @@ public class Board implements MessageHandler<GameMessage> {
     @Override
     public void handle(NetworkEnvelope<GameMessage> envelope) {
         if (envelope.message() instanceof MoveRequest message) {
-            // handle move message (depends on if we are host or not
-            if(HOST){
+            if (HOST) {
                 Piece f = fields[message.getFromPosition()].peek(); //inefficient to always peek, but too lazy to change signatures
                 triggerMove(f);
             }
@@ -262,12 +255,12 @@ public class Board implements MessageHandler<GameMessage> {
                 System.out.println(message.getText());
             }
         } else if (envelope.message() instanceof MoveInGoalMessage message) {
-            if(!HOST) {
+            if (!HOST) {
                 Piece p = fields[message.getFromPosition()].peek(); //inefficient to always peek, but too lazy to change signatures;
                 moveInGoal(p);
             }
         } else if (envelope.message() instanceof MoveMessage message) {
-            if(!HOST) {
+            if (!HOST) {
                 Piece p = fields[message.getFromPosition()].peek(); //inefficient to always peek, but too lazy to change signatures;
                 int destination = message.getDestination();
                 move(p, destination);

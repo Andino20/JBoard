@@ -31,12 +31,13 @@ public class Die extends GameObject {
     public void roll() {
         this.lastRoll = rng.nextInt(6) + 1;
     }
-    public void roll(int force) {
-        this.lastRoll = force;
-    }
 
     public int getRoll() {
         return lastRoll;
+    }
+
+    public void setLastRoll(int force) {
+        this.lastRoll = force;
     }
 
     public void setActive(boolean active) {

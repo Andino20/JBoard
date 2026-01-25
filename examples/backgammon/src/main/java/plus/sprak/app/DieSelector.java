@@ -35,8 +35,9 @@ public class DieSelector implements MessageHandler<GameMessage> {
     }
 
     public void roll() {
-        if(!HOST){
-            RollRequest msg = new RollRequest();session.broadcast(msg);
+        if (!HOST) {
+            RollRequest msg = new RollRequest();
+            session.broadcast(msg);
             return;
         }
         dice.forEach(Die::roll);
@@ -61,7 +62,7 @@ public class DieSelector implements MessageHandler<GameMessage> {
     }
 
     private void selectDie(int idx) {
-        if(!HOST){
+        if (!HOST) {
             SelectionRequest msg = new SelectionRequest();
             msg.setSelection(idx);
             session.broadcast(msg);
@@ -85,22 +86,22 @@ public class DieSelector implements MessageHandler<GameMessage> {
     @Override
     public void handle(NetworkEnvelope<GameMessage> envelope) {
         if (envelope.message() instanceof RollRequest message) {
-            if(HOST){
+            if (HOST) {
                 roll();
             }
         } else if (envelope.message() instanceof RollMessage message) {
-            if(!HOST){
-                dice.get(0).roll(message.getRoll0());
-                dice.get(1).roll(message.getRoll1());
+            if (!HOST) {
+                dice.get(0).setLastRoll(message.getRoll0());
+                dice.get(1).setLastRoll(message.getRoll1());
                 dice.forEach(die -> die.setActive(false));
                 isSelected = false;
             }
         } else if (envelope.message() instanceof SelectionRequest message) {
-            if(HOST){
+            if (HOST) {
                 selectDie(message.getSelection());
             }
         } else if (envelope.message() instanceof SelectionMessage message) {
-            if(!HOST){
+            if (!HOST) {
                 dice.get(selected).setActive(false);
                 this.selected = message.getSelection();
                 dice.get(selected).setActive(true);

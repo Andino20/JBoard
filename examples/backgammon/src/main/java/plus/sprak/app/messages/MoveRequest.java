@@ -1,11 +1,7 @@
 package plus.sprak.app.messages;
 
-/**
- * Represents a move request of a piece by transmitting its current location*/
 public class MoveRequest extends GameMessage {
 
-    // Just as an example. Use primitive types or types which implement java.io.Serializable
-    // otherwise we cannot parse message of this type
     private int fromPosition;
 
     public int getFromPosition() {
@@ -15,5 +11,6 @@ public class MoveRequest extends GameMessage {
     public void setFromPosition(int fromPosition) {
         this.fromPosition = fromPosition;
     }
+
 }
 
