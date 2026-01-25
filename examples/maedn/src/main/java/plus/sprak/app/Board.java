@@ -106,7 +106,7 @@ public class Board implements MessageHandler<GameMessage> {
         if (newPosition < 0) { // move to home
             Figure[] home = homes.get(f.getColor());
             OptionalInt freeSpot = findFreeHomeSpot(f.getColor());
-            int i = 0;
+            int i;
             if (freeSpot.isPresent()) {
                 i = freeSpot.getAsInt();
                 home[i] = f;
@@ -198,7 +198,7 @@ public class Board implements MessageHandler<GameMessage> {
         if (envelope.message() instanceof MoveRequest message) {
             // handle move message (depends on if we are host or not
             if(isHost){
-                Figure f = null;
+                Figure f;
                 if(message.getFromPosition() < 0){
                     f = homes.get(message.getColor())[10+message.getFromPosition()];
                 }
@@ -212,7 +212,7 @@ public class Board implements MessageHandler<GameMessage> {
                 triggerMove(f);
             }
         } else if (envelope.message() instanceof MoveMessage message && !isHost){
-                Figure f = null;
+                Figure f;
                 if(message.getFromPosition() < 0){
                     f = homes.get(message.getColor())[10+message.getFromPosition()];
                 }
