@@ -50,4 +50,5 @@ public class Figure extends GameObject {
     public void setMoveListener(Consumer<Figure> listener) {
         this.moveListener = listener;
     }
+
 }
