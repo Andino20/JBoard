@@ -4,7 +4,8 @@ import plus.jboard.core.GameApplication;
 import plus.jboard.math.Vector2D;
 import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
-import plus.sprak.app.messages.GameMessage;
+import plus.jboard.net.session.Session;
+import plus.sprak.app.messages.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,14 +14,13 @@ import java.util.List;
 import java.util.Stack;
 
 public class Board implements MessageHandler<GameMessage> {
-    //TODO: Würfel (in dem Fall DieSelector) so animieren dass man immer sieht das gewürfelt wurde (wie bei Maedn)
-    //TODO: Backgammon über das Netzwerk spielbar machen
-    //TODO: Eventuell: Column oder so ähnlich als Klasse rausziehen
-    //TODO: Super nice aber nicht notwendig: Rückgängigkeitsbutton bei beiden spielen der move zurück nimmt
 
     private static final int NUM_FIELDS = 24;
     private static final int BLACK_GOAL = -2;
     private static final int WHITE_GOAL = 25;
+    private final boolean HOST;
+    private final Session session;
+    private boolean initialisation = false;
 
     private final Stack<Piece>[] fields = new Stack[NUM_FIELDS];
     private final List<Piece> pieces = new ArrayList<>();
@@ -33,10 +33,14 @@ public class Board implements MessageHandler<GameMessage> {
     private final Stack<Piece> blackGoal = new Stack<>();
     private final Stack<Piece> whiteGoal = new Stack<>();
 
-    public Board(DieSelector dieSelector) throws IOException {
+    public Board(DieSelector dieSelector, boolean host, Session session) throws IOException {
+        setInitialisation(true);
         this.dieSelector = dieSelector;
+        this.session = session;
+        this.HOST = host;
         initBoard();
         GameApplication.getInstance().getMessageDispatcher().lateRegister(this);
+        setInitialisation(false);
     }
 
     private void initBoard() throws IOException {
@@ -54,15 +58,22 @@ public class Board implements MessageHandler<GameMessage> {
     private void initStartPosition(PieceColor c, int column, int amount) throws IOException {
         for (int i = 0; i < amount; i++) {
             Piece p = new Piece(c);
-            move(p, fields[column]);
+            move(p, column);
             p.setMoveListener(this::triggerMove);
             pieces.add(p);
         }
     }
 
-    public void triggerMove(Piece p) {
+    public void triggerMove(Piece clicked) {
+        if (!HOST) {
+            MoveRequest msg = new MoveRequest();
+            msg.setFromPosition(clicked.getFieldPosition());
+            session.broadcast(msg);
+            return;
+        }
         int dice = this.dieSelector.getRoll();
-        int change = 1; // Richtung ändert sich in Abhängigkeit von der Farbe
+        Piece p = fields[clicked.getFieldPosition()].peek();
+        int change = 1;
         if (p.getColor() == PieceColor.BLACK)
             change = -1;
         int nextPos = (p.getFieldPosition() + (dice * change));
@@ -71,6 +82,9 @@ public class Board implements MessageHandler<GameMessage> {
             if (canMoveToGoal(p.getColor())) {
                 moveInGoal(p);
             } else {
+                TextMessage msg = new TextMessage();
+                msg.setText("Piece cannot move to goal yet!");
+                session.broadcast(msg);
                 System.out.println("Piece cannot move to goal yet!");
             }
             return;
@@ -78,20 +92,23 @@ public class Board implements MessageHandler<GameMessage> {
 
         Stack<Piece> destinedPosition = fields[nextPos];
         if (destinedPosition.isEmpty() || destinedPosition.getFirst().getColor() == p.getColor()) {
-            move(p, destinedPosition); // no piece in the way, just move
+            move(p, nextPos); // no piece in the way, just move
         } else if (destinedPosition.getFirst().getColor() != p.getColor()) {
             if (destinedPosition.size() == 1) {//ein andersfarbiges Piece
                 if (destinedPosition.getFirst().getColor() == PieceColor.WHITE) {
-                    move(destinedPosition.getFirst(), whiteHome); // move other piece out of the way
+                    move(destinedPosition.getFirst(), -10); // move other piece out of the way
                 } else {
-                    move(destinedPosition.getFirst(), blackHome); //move other piece out of the way
+                    move(destinedPosition.getFirst(), -20); //move other piece out of the way
                 }
-                move(p, destinedPosition);
+                move(p, nextPos);
             } else {
+                TextMessage msg = new TextMessage();
+                msg.setText("Piece cannot move to goal yet!");
+                session.broadcast(msg);
                 System.out.println("Cant move Piece to this position");
             }
         } else {
-            move(p, destinedPosition);
+            move(p, nextPos);
         }
     }
 
@@ -108,11 +125,25 @@ public class Board implements MessageHandler<GameMessage> {
         dest.push(p);
         old.pop();
         updateScreenPosition(p);
+
+        if (HOST) {
+            MoveInGoalMessage msg = new MoveInGoalMessage();
+            msg.setFromPosition(p.getFieldPosition());
+            session.broadcast(msg);
+        }
     }
 
-    public void move(Piece p, Stack<Piece> destinedPosition) {
+    public void move(Piece p, int destinedFieldNum) {
+        int fromPosition = p.getFieldPosition();
         Stack<Piece> oldposition = getColumnOfPiece(p);
-
+        Stack<Piece> destinedPosition = null;
+        if (destinedFieldNum == -10) {
+            destinedPosition = whiteHome;
+        } else if (destinedFieldNum == -20) {
+            destinedPosition = blackHome;
+        } else {
+            destinedPosition = fields[destinedFieldNum];
+        }
         if (destinedPosition == whiteHome || destinedPosition == blackHome) {
             switch (p.getColor()) {
                 case WHITE -> p.setFieldPosition(-1);
@@ -132,6 +163,12 @@ public class Board implements MessageHandler<GameMessage> {
             oldposition.pop();
         }
         updateScreenPosition(p);
+        if (HOST && !getInitialisation()) {
+            MoveMessage msg = new MoveMessage();
+            msg.setFromPosition(fromPosition);
+            msg.setDestination(destinedFieldNum);
+            session.broadcast(msg);
+        }
     }
 
     private Stack<Piece> getColumnOfPiece(Piece p) {
@@ -193,6 +230,14 @@ public class Board implements MessageHandler<GameMessage> {
         return pieces;
     }
 
+    private boolean getInitialisation() {
+        return initialisation;
+    }
+
+    private void setInitialisation(boolean value) {
+        initialisation = value;
+    }
+
     @Override
     public Class<GameMessage> getAssociatedMessageType() {
         return GameMessage.class;
@@ -200,7 +245,27 @@ public class Board implements MessageHandler<GameMessage> {
 
     @Override
     public void handle(NetworkEnvelope<GameMessage> envelope) {
-        // TODO: if (envelope.message() instanceof...
+        if (envelope.message() instanceof MoveRequest message) {
+            if (HOST) {
+                Piece f = fields[message.getFromPosition()].peek(); //inefficient to always peek, but too lazy to change signatures
+                triggerMove(f);
+            }
+        } else if (envelope.message() instanceof TextMessage message) {
+            if (!HOST) {
+                System.out.println(message.getText());
+            }
+        } else if (envelope.message() instanceof MoveInGoalMessage message) {
+            if (!HOST) {
+                Piece p = fields[message.getFromPosition()].peek(); //inefficient to always peek, but too lazy to change signatures;
+                moveInGoal(p);
+            }
+        } else if (envelope.message() instanceof MoveMessage message) {
+            if (!HOST) {
+                Piece p = fields[message.getFromPosition()].peek(); //inefficient to always peek, but too lazy to change signatures;
+                int destination = message.getDestination();
+                move(p, destination);
+            }
+        }
     }
 
 }

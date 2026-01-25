@@ -36,6 +36,10 @@ public class Die extends GameObject {
         return lastRoll;
     }
 
+    public void setLastRoll(int force) {
+        this.lastRoll = force;
+    }
+
     public void setActive(boolean active) {
         this.color = active ? Color.GREEN : Color.BLACK;
     }
