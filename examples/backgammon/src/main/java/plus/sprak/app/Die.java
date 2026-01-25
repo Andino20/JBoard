@@ -6,7 +6,7 @@ import plus.jboard.math.Vector2D;
 import plus.jboard.render.RenderObject;
 import plus.jboard.render.TextRenderObject;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 public class Die extends GameObject {
@@ -23,11 +23,6 @@ public class Die extends GameObject {
         this.setPosition(position);
     }
 
-    @Override
-    public void onMouseClick(Vector2D position) {
-        clickCallback.run();
-    }
-
     public void roll() {
         this.lastRoll = rng.nextInt(6) + 1;
     }
@@ -42,6 +37,11 @@ public class Die extends GameObject {
 
     public void setActive(boolean active) {
         this.color = active ? Color.GREEN : Color.BLACK;
+    }
+
+    @Override
+    public void onMouseClick(Vector2D position) {
+        clickCallback.run();
     }
 
     @Override

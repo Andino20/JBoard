@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class Piece extends GameObject {
+
     private final PieceColor color;
     private int fieldPosition;
     private Consumer<Piece> moveListener;
@@ -27,13 +28,6 @@ public class Piece extends GameObject {
         this.sprite = new Sprite(Path.of("src", "main", "resources", filename).toUri());
     }
 
-    @Override
-    public void onMouseClick(Vector2D position) {
-        if (moveListener != null) {
-            moveListener.accept(this);
-        }
-    }
-
     public PieceColor getColor() {
         return color;
     }
@@ -48,6 +42,13 @@ public class Piece extends GameObject {
 
     public void setMoveListener(Consumer<Piece> listener) {
         this.moveListener = listener;
+    }
+
+    @Override
+    public void onMouseClick(Vector2D position) {
+        if (moveListener != null) {
+            moveListener.accept(this);
+        }
     }
 
 }

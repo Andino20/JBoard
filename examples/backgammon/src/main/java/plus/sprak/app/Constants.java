@@ -2,7 +2,6 @@ package plus.sprak.app;
 
 import plus.jboard.math.Vector2D;
 
-import java.util.List;
 import java.util.Map;
 
 public class Constants {
