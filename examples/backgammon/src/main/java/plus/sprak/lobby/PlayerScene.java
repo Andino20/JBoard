@@ -5,7 +5,7 @@ import plus.jboard.core.Scene;
 import plus.jboard.net.NetworkEnvelope;
 import plus.jboard.net.handler.MessageHandler;
 import plus.jboard.net.session.PlayerSession;
-import plus.sprak.app.MaednScene;
+import plus.sprak.app.BackgammonScene;
 import plus.sprak.lobby.messages.GameStartMessage;
 
 import javax.swing.*;
@@ -62,7 +62,7 @@ public class PlayerScene extends Scene implements MessageHandler<GameStartMessag
     public void handle(NetworkEnvelope<GameStartMessage> messageContext) {
         GameApplication app = GameApplication.getInstance();
         try {
-            app.switchScenes(new MaednScene(session, false));
+            app.switchScenes(new BackgammonScene(session, false));
             app.getMessageDispatcher().lateUnregister(this);
         } catch (IOException e) {
             System.out.println("Failed to switch to MaednScene");

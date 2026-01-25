@@ -3,7 +3,7 @@ package plus.sprak.lobby;
 import plus.jboard.core.GameApplication;
 import plus.jboard.core.Scene;
 import plus.jboard.net.session.HostSession;
-import plus.sprak.app.MaednScene;
+import plus.sprak.app.BackgammonScene;
 import plus.sprak.lobby.messages.GameStartMessage;
 
 import javax.swing.*;
@@ -60,7 +60,7 @@ public class HostScene extends Scene {
         startButton.setEnabled(false);
         startButton.addActionListener(e -> {
             try {
-                GameApplication.getInstance().switchScenes(new MaednScene(session, true));
+                GameApplication.getInstance().switchScenes(new BackgammonScene(session, true));
             } catch (IOException ex) {
                 throw new RuntimeException("");
             }

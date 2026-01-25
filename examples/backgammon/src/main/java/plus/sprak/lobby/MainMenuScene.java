@@ -6,7 +6,6 @@ import plus.jboard.net.session.HostConfig;
 import plus.jboard.net.session.HostSession;
 import plus.jboard.net.session.PlayerConfig;
 import plus.jboard.net.session.PlayerSession;
-import plus.sprak.app.MaednScene;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,7 +27,7 @@ public class MainMenuScene extends Scene {
         gbc.anchor = GridBagConstraints.CENTER;
 
         // Title
-        JLabel title = new JLabel("Mensch ärgere dich nicht!", SwingConstants.CENTER);
+        JLabel title = new JLabel("Backgammon", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         gbc.gridy = 0;
@@ -83,7 +82,7 @@ public class MainMenuScene extends Scene {
 
             // TODO: Here you can change how many clients can join
             HostSession session = new HostSession(HostConfig.builder()
-                    .maxClients(3)
+                    .maxClients(1)
                     .port(Integer.parseInt(portText))
                     .build());
             app.addUpdatable(session);
