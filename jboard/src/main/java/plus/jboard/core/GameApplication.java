@@ -19,19 +19,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public final class GameApplication implements Runnable {
 
-    private static final double FPS = 60.0;
+    private static final double FPS = 30.0;
     private static final long FRAME_NANOS = (long) (1_000_000_000 / FPS);
+
+    private JLayeredPane layeredPane;
+    private RenderContext renderer;
+
+    private volatile Scene currentScene = new Scene();
+
+    private final List<Updatable> updatables = new CopyOnWriteArrayList<>();
 
     @Getter
     private static GameApplication instance;
-
-    private final JFrame window;
-    private final JLayeredPane layeredPane;
-    private final RenderContext renderer;
-
-    private volatile Scene currentScene;
-
-    private final List<Updatable> updatables = new CopyOnWriteArrayList<>();
 
     @Getter
     private final MessageCollector messageCollector = new MessageCollector();
@@ -44,9 +43,13 @@ public final class GameApplication implements Runnable {
             throw new IllegalStateException("GameApplication already initialized");
         }
         instance = this;
+        init(title, width, height, startingScene);
+    }
+
+    private void init(String title, int width, int height, Scene startingScene) {
         this.currentScene = startingScene;
 
-        window = initFrame(title, width, height);
+        JFrame window = initFrame(title, width, height);
         layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
 
@@ -60,15 +63,20 @@ public final class GameApplication implements Runnable {
                         notifyMouseClick(Vector2D.of(e.getX(), e.getY()))
         );
 
-        startingScene.getUI().ifPresent(ui -> {
-            ui.setBounds(0, 0, width, height);
-            layeredPane.add(ui, Integer.valueOf(1));
-        });
+        switchScenes(startingScene);
 
         window.setContentPane(layeredPane);
         window.setVisible(true);
 
         updatables.add(messageDispatcher);
+    }
+
+    private static JFrame initFrame(String title, int width, int height) {
+        JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setLocationRelativeTo(null);
+        return frame;
     }
 
     @Override
@@ -150,13 +158,5 @@ public final class GameApplication implements Runnable {
             messageDispatcher.dispatch(envelope);
             processed++;
         }
-    }
-
-    private static JFrame initFrame(String title, int width, int height) {
-        JFrame frame = new JFrame(title);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(width, height);
-        frame.setLocationRelativeTo(null);
-        return frame;
     }
 }

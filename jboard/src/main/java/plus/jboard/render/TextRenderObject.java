@@ -16,4 +16,5 @@ public record TextRenderObject(Vector2D position, String text, Color color) impl
             g2d.setFont(f);
         }
     }
+
 }

@@ -1,12 +1,14 @@
 package plus.jboard.render;
 
+import lombok.Getter;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+@Getter
 public class Sprite {
 
     private final Image image;
@@ -17,10 +19,6 @@ public class Sprite {
 
     public Sprite(Image image) {
         this.image = image;
-    }
-
-    public Image getImage() {
-        return image;
     }
 
     public int getWidth() {
