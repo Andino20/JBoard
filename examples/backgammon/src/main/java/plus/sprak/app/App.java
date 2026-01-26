@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        GameApplication app = new GameApplication("Backgammon", 840, 560, new MainMenuScene());
+        GameApplication app = new GameApplication("Backgammon", 840, 580, new MainMenuScene());
         app.run();
 
     }

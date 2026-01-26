@@ -80,7 +80,6 @@ public class MainMenuScene extends Scene {
 
             GameApplication app = GameApplication.getInstance();
 
-            // TODO: Here you can change how many clients can join
             HostSession session = new HostSession(HostConfig.builder()
                     .maxClients(1)
                     .port(Integer.parseInt(portText))

@@ -8,8 +8,8 @@ public class Constants {
     private Constants() {}
 
     public static final Map<Integer, Vector2D> columnPositionToPixel = Map.ofEntries(
-            Map.entry(-2, Vector2D.of(755, 5)),
-            Map.entry(-1, Vector2D.of(343, 22)),
+            Map.entry(-2, Vector2D.of(755, 0)),
+            Map.entry(-1, Vector2D.of(335, 22)),
             Map.entry(0, Vector2D.of(641, 22)),
             Map.entry(1, Vector2D.of(591, 22)),
             Map.entry(2, Vector2D.of(540, 22)),
@@ -34,8 +34,7 @@ public class Constants {
             Map.entry(21, Vector2D.of(540, 459)),
             Map.entry(22, Vector2D.of(591, 459)),
             Map.entry(23, Vector2D.of(641, 459)),
-            Map.entry(24, Vector2D.of(343, 459)),
-            Map.entry(25, Vector2D.of(715, 475))
-
+            Map.entry(24, Vector2D.of(335, 459)),
+            Map.entry(25, Vector2D.of(715, 540))
     );
 }

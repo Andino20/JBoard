@@ -57,7 +57,6 @@ public class HostScene extends Scene {
         root.add(scrollPane, gbc);
 
         startButton = new JButton("Start");
-        startButton.setEnabled(false);
         startButton.addActionListener(e -> {
             try {
                 GameApplication.getInstance().switchScenes(new BackgammonScene(session, true));
@@ -84,7 +83,6 @@ public class HostScene extends Scene {
 
     private void onPlayerJoin(UUID id) {
         this.addPlayer(id.toString());
-        this.startButton.setEnabled(true);
     }
 
 }

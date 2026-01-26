@@ -76,6 +76,7 @@ public final class GameApplication implements Runnable {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
         return frame;
     }
 
