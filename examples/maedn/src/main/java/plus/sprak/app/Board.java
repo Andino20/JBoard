@@ -29,64 +29,68 @@ public class Board implements MessageHandler<GameMessage> {
         this.d6 = d6;
         this.isHost = host;
         this.session = session;
+        initBoard();
+
+        GameApplication.getInstance().getMessageDispatcher().lateRegister(this);
+    }
+
+    private void initBoard() throws IOException {
         for (PieceColor c : PieceColor.values()) {
             goals.putIfAbsent(c, new Figure[4]);
             Figure[] homeFigures = homes.computeIfAbsent(c, k -> new Figure[4]);
 
             for (int i = 0; i < homeFigures.length; i++) {
                 Figure f = new Figure(c);
-                move(f, -100); //for initialisation
-
+                move(f, -100);
                 f.setMoveListener(this::triggerMove);
                 figures.add(f);
             }
         }
-
-        // Register this class as a message handler with the dispatcher
-        // You can create as many message handler of different types as you want
-        // Just remember to register them, or otherwise they cannot receive messages
-        GameApplication.getInstance().getMessageDispatcher().lateRegister(this);
     }
 
     public void triggerMove(Figure f) {
-        if(!isHost){
-            MoveRequest msg = new MoveRequest();
-            msg.setFromPosition(f.getFieldPosition());
-            msg.setColor(f.getColor());
+        if (!isHost) {
+            MoveRequest msg = new MoveRequest(f.getFieldPosition(), f.getColor());
             session.broadcast(msg);
             return;
         }
-        if(d6.isUsed()){
+
+        if (d6.isUsed()) {
             return;
         }
-        int dice = d6.getRoll();
-        if (dice != 6 && f.getFieldPosition() < 0)
+
+        int position = f.getFieldPosition();
+        int roll = d6.getRoll();
+        if (roll != 6 && isHomePosition(position))
             return;
 
-        if (f.getFieldPosition() > 99 && ((dice + f.getFieldPosition()) % 100 > 3 || goals.get(f.getColor()) == null))
+        if (isGoalPosition(position) && (position + roll) % 100 > 3)
             return;
 
-        int nextPos = (f.getFieldPosition() + dice) % NUM_FIELDS;
-        if (dice == 6 && f.getFieldPosition() < 0) {
-            nextPos = getStartPositionByColor(f.getColor());
-        } else if (nextPos >= getStartPositionByColor(f.getColor()) && nextPos <= getStartPositionByColor(f.getColor()) + 6 && (nextPos % 10) < dice) { //move into house
-            nextPos = 100 + (f.getFieldPosition() + dice) % 10;
-            if (goals.get(f.getColor())[nextPos%100] == null) { //check for space in goal, go around otherwise
+        final int startPos = Constants.getStartPositionByColor(f.getColor());
+        int nextPos = (position + roll) % NUM_FIELDS;
+
+        if (roll == 6 && isHomePosition(position)) {
+            nextPos = startPos;
+        } else if (nextPos >= startPos
+                && nextPos <= startPos + 6
+                && (nextPos % 10) < roll) { //move into goal
+            nextPos = 100 + (position + roll) % 10;
+            if (goals.get(f.getColor())[nextPos % 100] == null) { //check for space in goal.
                 move(f, nextPos);
             } else {
-                nextPos = getStartPositionByColor(f.getColor()) + nextPos%100;
+                nextPos = startPos + nextPos % 100;
             }
-        } else if (f.getFieldPosition() > 99) { //move inside goal
-            nextPos = f.getFieldPosition() + dice;
-            if (goals.get(f.getColor())[nextPos%100] == null) {
+        } else if (position > 99) { //move inside goal
+            nextPos = position + roll;
+            if (goals.get(f.getColor())[nextPos % 100] == null) {
                 move(f, nextPos);
-            }
-            else{
+            } else {
                 return;
             }
         }
 
-        if (f.getFieldPosition() < 100) { //normal move, not in goal
+        if (position < 100) { //normal move, not in goal
             if (fields[nextPos] == null) {
                 move(f, nextPos); // no piece in the way, just move
             } else if (fields[nextPos].getColor() != f.getColor()) {
@@ -113,7 +117,7 @@ public class Board implements MessageHandler<GameMessage> {
                 f.setPosition(Constants.homeToPixel.get(f.getColor()).get(i));
                 calcNewPosition = i - 10; //to encode the different places in home
             }
-        } else if (newPosition > 99){ // move in goal
+        } else if (newPosition > 99) { // move in goal
             Figure[] goal = goals.get(f.getColor());
             int i = newPosition % 100;
             if (goal[i] != null) {
@@ -121,8 +125,7 @@ public class Board implements MessageHandler<GameMessage> {
             }
             goal[i] = f;
             f.setPosition(Constants.goalToPixel.get(f.getColor()).get(i));
-        }
-        else { // move to field
+        } else { // move to field
             fields[newPosition] = f;
             f.setPosition(Constants.fieldToPixel.get(newPosition));
         }
@@ -152,17 +155,10 @@ public class Board implements MessageHandler<GameMessage> {
         }
 
         f.setFieldPosition(calcNewPosition);
-        if(isHost && newPosition != -100){
-            MoveMessage msg = new MoveMessage();
-            msg.setFromPosition(oldPosition);
-            msg.setToPosition(newPosition);
-            msg.setColor(f.getColor());
+        if (isHost && newPosition != -100) {
+            MoveMessage msg = new MoveMessage(oldPosition, newPosition, f.getColor());
             session.broadcast(msg);
         }
-    }
-
-    public List<Figure> getAllFigures() {
-        return figures;
     }
 
     private OptionalInt findFreeHomeSpot(PieceColor color) {
@@ -175,57 +171,49 @@ public class Board implements MessageHandler<GameMessage> {
         return OptionalInt.empty();
     }
 
-    private static int getStartPositionByColor(PieceColor color) {
-        return switch (color) {
-            case RED -> 0;
-            case YELLOW -> 10;
-            case BLUE -> 20;
-            case GREEN -> 30;
-        };
+    public boolean isHomePosition(int position) {
+        return position < 0;
     }
 
-    // We tell the message dispatcher what type of message we are interested in
+    public boolean isGoalPosition(int position) {
+        return position >= 100;
+    }
+
+    public List<Figure> getAllFigures() {
+        return figures;
+    }
+
     @Override
     public Class<GameMessage> getAssociatedMessageType() {
         return GameMessage.class;
     }
 
-    // We receive message of our type of interest
-    // Envelopes also contain the connection from where the message came, so you could theoretically reply
-    // to the sender
     @Override
     public void handle(NetworkEnvelope<GameMessage> envelope) {
-        if (envelope.message() instanceof MoveRequest message) {
-            // handle move message (depends on if we are host or not
-            if(isHost){
-                Figure f;
-                if(message.getFromPosition() < 0){
-                    f = homes.get(message.getColor())[10+message.getFromPosition()];
-                }
-                else if(message.getFromPosition() > 99){
-                    f = goals.get(message.getColor())[message.getFromPosition()-100];
-                }
-                else{
-                    f = fields[message.getFromPosition()];
-                }
-
-                triggerMove(f);
+        if (envelope.message() instanceof MoveRequest message && isHost) {
+            Figure f;
+            if (message.getFromPosition() < 0) {
+                f = homes.get(message.getColor())[10 + message.getFromPosition()];
+            } else if (message.getFromPosition() > 99) {
+                f = goals.get(message.getColor())[message.getFromPosition() - 100];
+            } else {
+                f = fields[message.getFromPosition()];
             }
-        } else if (envelope.message() instanceof MoveMessage message && !isHost){
-                Figure f;
-                if(message.getFromPosition() < 0){
-                    f = homes.get(message.getColor())[10+message.getFromPosition()];
-                }
-                else if(message.getFromPosition() > 99){
-                    f = goals.get(message.getColor())[message.getFromPosition()-100];
-                }
-                else{
-                    f = fields[message.getFromPosition()];
-                }
 
-                move(f, message.getToPosition());
-                d6.use();
+            triggerMove(f);
+        } else if (envelope.message() instanceof MoveMessage message && !isHost) {
+            Figure f;
+            if (message.getFromPosition() < 0) {
+                f = homes.get(message.getColor())[10 + message.getFromPosition()];
+            } else if (message.getFromPosition() > 99) {
+                f = goals.get(message.getColor())[message.getFromPosition() - 100];
+            } else {
+                f = fields[message.getFromPosition()];
             }
+
+            move(f, message.getToPosition());
+            d6.use();
+        }
 
     }
 

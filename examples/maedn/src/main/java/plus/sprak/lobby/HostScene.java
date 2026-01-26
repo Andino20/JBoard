@@ -57,7 +57,7 @@ public class HostScene extends Scene {
         root.add(scrollPane, gbc);
 
         startButton = new JButton("Start");
-        startButton.setEnabled(false);
+        startButton.setEnabled(true);
         startButton.addActionListener(e -> {
             try {
                 GameApplication.getInstance().switchScenes(new MaednScene(session, true));

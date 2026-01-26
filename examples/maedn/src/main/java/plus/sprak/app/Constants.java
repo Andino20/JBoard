@@ -105,4 +105,13 @@ public class Constants {
             Map.entry(38, Vector2D.of(658, 160)),
             Map.entry(39, Vector2D.of(658, 203))
     );
+
+    static int getStartPositionByColor(PieceColor color) {
+        return switch (color) {
+            case RED -> 0;
+            case YELLOW -> 10;
+            case BLUE -> 20;
+            case GREEN -> 30;
+        };
+    }
 }

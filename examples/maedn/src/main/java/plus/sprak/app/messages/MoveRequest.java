@@ -4,8 +4,13 @@ import plus.sprak.app.PieceColor;
 
 public class MoveRequest extends GameMessage {
 
-    private int fromPosition;
-    private PieceColor color;
+    private final int fromPosition;
+    private final PieceColor color;
+
+    public MoveRequest(int fromPosition, PieceColor color) {
+        this.fromPosition = fromPosition;
+        this.color = color;
+    }
 
     public int getFromPosition() {
         return fromPosition;
@@ -15,12 +20,4 @@ public class MoveRequest extends GameMessage {
         return color;
     }
 
-    public void setFromPosition(int fromPosition) {
-        this.fromPosition = fromPosition;
-    }
-
-    public void setColor(PieceColor color) {
-        this.color = color;
-    }
-    
 }
