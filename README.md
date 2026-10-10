@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a **Java-based framework for creating 2D board games**.
+This project is a **Java-based framework for creating 2D board games** with multiplayer support.
 
 ## Features
 
